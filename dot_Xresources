@@ -1,0 +1,64 @@
+! To apply changes made to this file:
+! xrdb -merge ~/.Xresources
+
+! colors
+xterm*termName: xterm-256color
+xterm*background: rgb:18/18/18
+xterm*foreground: rgb:d8/d8/d8
+
+! font & appearance
+xterm*faceName: Cascadia Code
+xterm*faceSize: 12
+xterm*renderFont: true
+xterm*boldMode: false
+xterm*internalBorder: 4
+xterm*borderWidth: 0
+
+! improve double-click selection behavior
+xterm*charClass: 33:48,35-47:48,58-59:48,61:48,63-64:48,95:48,126:48
+
+! key bindings
+! C-+ bigger font
+! C-- smaller font
+! C-0 default font size
+! CS-c and CS-v for copy/paste
+! CS-b and CS-f for scroll back/forward
+! CS-h toggle alternate screen
+! Shift-click opens selection (e.g., open selected URL in web browser)
+xterm*vt100.translations: #override \n\
+	Ctrl <Key> minus: smaller-vt-font() \n\
+	Ctrl <Key> plus: larger-vt-font() \n\
+	Ctrl <Key> 0: set-vt-font(d) \n\
+	Shift <KeyPress> Insert: insert-selection(CLIPBOARD) \n\
+	Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
+	Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+	Ctrl Shift <Key>B: scroll-back(1, halfpage) \n\
+	Ctrl Shift <Key>F: scroll-forw(1, halfpage) \n\
+	Ctrl Shift <Key>H: set-altscreen(toggle) \n\
+	Shift <Btn1Up>: exec-formatted("xdg-open '%t'", PRIMARY) select-start() select-end()
+
+! only select text
+xterm*highlightSelection: true
+! remove trailing spaces
+xterm*trimSelection: true
+
+! lines of output that you can scroll back over
+xterm*saveLines: 32768
+! turn the scrollbar off
+xterm*scrollBar: false
+
+! do not scroll when there is new input e.g. tail -f /var/syslog
+xterm*scrollTtyOutput: false
+! scroll to bottom on key press
+xterm*scrollKey: true
+
+! fix Alt key
+xterm*metaSendsEscape: true
+xterm*eightBitInput: false
+! fix Backspace key
+xterm*backarrowKey: false
+xterm.ttyModes: erase ^?
+
+! ignore LC_CTYPE, use UTF-8
+xterm*locale: false
+xterm*utf8: true
