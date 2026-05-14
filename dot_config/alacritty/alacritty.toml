@@ -1,0 +1,20 @@
+[font]
+normal = { family = "Cascadia Code", style = "Regular" }
+size = 12.0
+
+[window]
+dimensions = { columns = 80, lines = 24 }
+resize_increments = true
+
+[mouse]
+hide_when_typing = true
+
+[[keyboard.bindings]]
+action = "ToggleFullscreen"
+key = "F11"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
