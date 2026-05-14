@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# make executable files
+set -u
+
+if [ $# -eq 0 ]; then
+	echo "usage: $0 [files ...]" 1>&2
+	echo "touch and chmod +x all paths provided as arguments" 1>&2
+	exit 1
+fi
+
+for f in "$@"; do
+	touch -- "$f"
+	if [ $? -ne 0 ]; then
+		echo "$0: failed to touch $f, continuing" 1>&2
+	else
+		chmod +x "$f"
+		if [ $? -ne 0 ]; then
+			echo "$0: failed to chmod +x $f, continuing" 1>&2
+		fi
+	fi
+done

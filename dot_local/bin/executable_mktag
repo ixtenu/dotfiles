@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+# ctags(1) (universal-ctags) wrapper script
+set -eu
+
+ctags=
+if command -v uctags >/dev/null 2>&1; then
+	ctags="uctags"
+elif command -v ctags >/dev/null 2>&1; then
+	ctags="ctags"
+else
+	echo "$0: no ctags found in PATH, please install universal-ctags" 1>&2
+	exit 1
+fi
+
+# search for .git in ancestor directories
+dir=$(readlink -f $(pwd))
+while [ ! -e .git ]; do
+	if [ "$(pwd)" = "/" ]; then
+		# not a Git repo, use the original PWD
+		cd "$dir"
+		break
+	fi
+	cd ..
+done
+
+$ctags -R "$@"

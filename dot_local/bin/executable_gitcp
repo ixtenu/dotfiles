@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# alias for git cherry-pick
+
+git cherry-pick "$@"

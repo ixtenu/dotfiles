@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# convert to uppercase
+tr 'a-z' 'A-Z'

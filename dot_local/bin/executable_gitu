@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# alias for git push
+
+git push "$@"

@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+# remove one level of indentation
+set -uo pipefail
+
+usage() {
+	echo "usage: $0 [-e] [-E n]" 1>&$1
+	echo "Remove indentation (by default, four spaces and/or a tab) from stdin.  With -e," 1>&$1
+	echo "remove four spaces.  With -En, remove n spaces.  Either -e or -En will cause" 1>&$1
+	echo "tabs to be ignored." 1>&$1
+	exit $(($1 - 1))
+}
+
+ichars=
+while getopts heE: name; do
+	case $name in
+	e) ichars='    ';; # four spaces
+	E)
+		ichars=
+		for i in $(seq 1 $OPTARG); do
+			ichars="${ichars} "
+		done;;
+	h) usage 1;;
+	?) usage 2;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+if [ $# -ne 0 ]; then
+	echo "$0: unexpected arguments: $@" 1>&2
+	usage 2
+fi
+
+if [ "$ichars" = "" ]; then
+	# "do what I mean" mode: first substitution removes four spaces, second
+	# removes one tab; this allows unindenting code which uses either tabs
+	# or four spaces for indentation, as long as tabs don't follow spaces
+	sed 's/^    //' | sed 's/^	//'
+else
+	sed "s/^$ichars//"
+fi

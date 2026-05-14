@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# alias for git diff --cached
+
+git diff --cached "$@"

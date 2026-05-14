@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# nix-shell(1) wrapper which starts zsh(1).
+
+if ! command -v nix-shell >/dev/null 2>&1; then
+	echo "$(basename $0): no nix-shell in PATH" 1>&2
+	exit 1
+fi
+
+exec nix-shell --run zsh "$@"

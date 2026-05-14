@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# If plan9port is in the PATH, remove it and run a command.
+
+if [ ! -z "$PLAN9" ]; then
+	PATH="$(echo $PATH | sed "s,^$PLAN9/bin:,,")"
+	PATH="$(echo $PATH | sed "s,:$PLAN9/bin,,g")"
+	export PATH
+fi
+
+if [ $# -gt 0 ]; then
+	exec "$@"
+else
+	# if run without arguments, print the resulting 9-less PATH
+	echo PATH="$PATH"
+fi

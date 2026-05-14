@@ -1,0 +1,92 @@
+#!/usr/bin/env sh
+# unexpand(1) wrapper script
+set -u
+
+usage() {
+	echo "usage: $0 [-t tab_stop] [file ...]" 1>&$1
+	echo "Unexpand spaces to tabs assuming tab stops every tab_stop (default 4) columns." 1>&$1
+	echo "If files are specified, unexpands tabs in them; otherwise reads from stdin and" 1>&$1
+	echo "writes to stdout." 1>&$1
+	exit $(($1 - 1))
+}
+
+tabw=4
+while getopts t:h name; do
+	case $name in
+	t) tabw=$OPTARG;;
+	h) usage 1;;
+	?) usage 2;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+targ=""
+if [ $tabw -ne 8 ]; then
+	# all unexpand(1) implementations except OpenBSD's support -t
+	targ="-t$tabw"
+	if [ "$(uname)" = "OpenBSD" ]; then
+		echo "$0: OpenBSD unexpand lacks -t option, must use -t8" 1>&2
+		exit 1
+	fi
+fi
+
+# -t implicitly enables -a which we don't really want.  GNU coreutils has a
+# ---first-only option to disable -a; use that if it's available.
+if [ -n "$targ" ] && echo "" | unexpand --first-only >/dev/null 2>&1; then
+	targ="$targ --first-only"
+fi
+
+[ $# -eq 0 ] && exec unexpand $targ
+
+cp_attr() {
+	src="$1"
+	dst="$2"
+	if [ "$(uname)" = "Linux" ]; then
+		# copy attributes only
+		# GNU coreutils cp(1) extension
+		cp -a --attributes-only "$src" "$dst"
+	else
+		# copies attributes _and_ data
+		cp -a "$src" "$dst"
+	fi
+}
+
+for f in "$@"; do
+	# create a temporary file
+	tmpf="$(mktemp)"
+	if [ $? -ne 0 ]; then
+		ev=$?
+		echo "$0: error creating temporary file, stopping" 1>&2
+		exit $ev
+	fi
+
+	# ensure the temporary file has the same attributes as the file being
+	# processed, so that no attributes are changed when replace the file
+	# being processed with the original file
+	cp_attr "$f" "$tmpf"
+	if [ $? -ne 0 ]; then
+		ev=$?
+		echo "$0: error updating attributes on $tmpf, stopping" 1>&2
+		rm "$tmpf"
+		exit $ev
+	fi
+
+	unexpand $targ <"$f" >"$tmpf"
+	if [ $? -ne 0 ]; then
+		ev=$?
+		echo "$0: error unexpanding $f into $tmpf, stopping" 1>&2
+		exit $ev
+	fi
+
+	# skip rewriting the file if nothing changed
+	if cmp "$tmpf" "$f" >/dev/null 2>&1; then
+		rm "$tmpf"
+	else
+		mv "$tmpf" "$f"
+		if [ $? -ne 0 ]; then
+			ev=$?
+			echo "$0: error moving $tmpf to $f, stopping" 1>&2
+			exit $ev
+		fi
+	fi
+done
