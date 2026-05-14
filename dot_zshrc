@@ -1,0 +1,46 @@
+# Generic shell initialization (not specific to zsh)
+[ -f "$HOME/.shrc" ] && source "$HOME/.shrc"
+
+HISTFILE=~/.histfile
+HISTSIZE=32768
+SAVEHIST=32768
+
+setopt HIST_IGNORE_SPACE
+setopt interactivecomments
+setopt autocd notify
+unsetopt beep
+
+bindkey -e
+
+# Customize the prompt.  Based on the "walters" theme but with a simpler PS1.
+autoload -Uz promptinit && promptinit
+prompt_custom_setup() {
+	PS1="%# "
+	if [ "$TERM" != "dumb" ] && [ -z "$INSIDE_EMACS" ]; then
+		RPS1="%F{243}%~%f"
+	fi
+	prompt_opts=(cr percent)
+}
+prompt_themes+=(custom)
+prompt custom
+
+# zsh plugin directory varies by system.
+zshplugdir=""
+if [ -d "/usr/share/zsh/plugins/" ]; then
+	zshplugdir="/usr/share/zsh/plugins/"
+elif [ -d "/usr/share/zsh-autosuggestions" ]; then
+	zshplugdir="/usr/share"
+elif [ -d "/usr/local/share/zsh-autosuggestions" ]; then
+	zshplugdir="/usr/local/share"
+fi
+
+# Source plugins
+if [ ! -z "$zshplugdir" ]; then
+	if [ -f "$zshplugdir"/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+		source "$zshplugdir"/zsh-autosuggestions/zsh-autosuggestions.zsh
+	fi
+	# zsh-syntax-highlighting docs says it must be sourced at the very end.
+	if [ -f "$zshplugdir"/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+		source "$zshplugdir"/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+	fi
+fi

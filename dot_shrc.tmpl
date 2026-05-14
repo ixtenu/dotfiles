@@ -1,0 +1,133 @@
+# Generic shell initialization
+# Can be sourced from .zshrc, .bashrc, .kshrc, etc.
+
+iscmd() {
+	command -v "$1" >/dev/null 2>&1
+}
+
+alias df='df -h'
+alias du='du -h'
+{{- if ne .chezmoi.os "openbsd" }}
+alias grep='grep --color=auto'
+{{- end }}
+# ls
+{{- if eq .chezmoi.os "openbsd" }}
+alias ls='ls -hF'
+{{- else }}
+alias ls='ls -hF --color=auto'
+{{- end }}
+alias lr='ls -R' # recursive ls
+alias ll='ls -l' # detailed ls
+alias la='ll -A' # detailed ls, including dotfiles
+{{- if eq .chezmoi.os "linux" }}
+alias lx='ll -BX' # sort by extension
+{{- end }}
+alias lz='ll -rS' # sort by size
+alias lt='ll -rt' # sort by date
+{{- if eq .chezmoi.os "linux" }}
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+{{- end }}
+
+# Add directory to PATH if it exists and isn't already in PATH.
+addtopath() {
+	[ ! -d $1 ] && return
+	echo "$PATH" | grep ":$1$" >/dev/null && return
+	echo "$PATH" | grep ":$1:" >/dev/null && return
+	export PATH=$PATH:$1
+}
+
+addtopath $HOME/bin
+addtopath $HOME/.local/bin
+addtopath $HOME/go/bin
+addtopath $HOME/.cargo/bin
+
+if [ -d /usr/local/plan9 ]; then
+	export PLAN9=/usr/local/plan9
+elif [ -d $HOME/plan9 ]; then
+	export PLAN9=$HOME/plan9
+fi
+[ ! -z "$PLAN9" ] && addtopath $PLAN9/bin
+
+# The vis text editor installs as vise in *BSD userlands because there's a
+# vis(1) utility in the base system.
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "freebsd") (eq .chezmoi.os "openbsd") }}
+vis_exe='vise'
+if iscmd $vis_exe; then
+	alias visu='/usr/bin/vis'
+	alias vis='vise'
+fi
+{{- else }}
+vis_exe='vis'
+{{- end }}
+
+if iscmd $vis_exe; then
+	export EDITOR=$vis_exe
+	export VISUAL=$vis_exe
+fi
+
+# Short-hand for the default editor
+[ -n "$VISUAL" ] && alias e="$VISUAL"
+
+if iscmd fzf; then
+	fzp() {
+		if [ $# -lt 1 ]; then
+			echo "fzp: must specify a program name" 1>&2
+			return 1
+		fi
+		program="$1"
+		shift
+		"$program" "$@" $(fzf -m)
+	}
+
+	fze() {
+		if [ -z "$VISUAL" ]; then
+			echo "fze: cannot open editor when VISUAL is unset"
+			return 1
+		fi
+		fzp "$VISUAL" "$@"
+	}
+fi
+
+mkcd() {
+	if [ $# -eq 0 ]; then
+		echo "$0: missing operand" 1>&2
+		echo "usage: $0 directory" 1>&2
+		echo "mkdir and chdir into the given directory." 1>&2
+		return 1
+	fi
+	mkdir -p "$1"
+	cd "$1"
+}
+
+upcd() {
+	dir=""
+	for i in $(seq 1 $1); do
+		dir="../$dir"
+	done
+	[ -z "$dir" ] && dir="$PWD"
+	cd "$dir"
+}
+
+lk() {
+	if ! iscmd walk; then
+		echo "lk: walk must be installed" 1>&2
+		return 1
+	fi
+	cd "$(walk "$@")"
+}
+
+# Debian/Ubuntu renamed fd to fdfind due to a naming conflict.
+iscmd fdfind && ! iscmd fd && alias fd='fdfind'
+
+# Consistent names for Sublime Merge
+if ! iscmd subm; then
+	if iscmd sublime_merge; then
+		alias subm='sublime_merge'
+	elif iscmd subl-merge; then
+		alias subm='subl-merge'
+	elif iscmd smerge; then
+		alias subm='smerge'
+	fi
+fi
