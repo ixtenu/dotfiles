@@ -1,0 +1,15 @@
+Dotfiles README
+===============
+
+This is a dotfiles repository managed with Chezmoi: <https://www.chezmoi.io/>
+
+Licensing
+---------
+
+All work in this repository which is original to me (i.e., not copied or derived
+from others' works) is licensed under the terms given in the LICENSE file found
+in the project root directory.
+
+Files, or portions of files, which are not original to me (copied or derived
+from others' works) are marked with comments indicating the origin, copyright
+owner, and license terms.
