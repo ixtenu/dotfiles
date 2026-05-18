@@ -121,7 +121,7 @@ lk() {
 # Debian/Ubuntu renamed fd to fdfind due to a naming conflict.
 iscmd fdfind && ! iscmd fd && alias fd='fdfind'
 
-# Consistent names for Sublime Merge
+# Consistent name for Sublime Merge
 if ! iscmd subm; then
 	if iscmd sublime_merge; then
 		alias subm='sublime_merge'
@@ -129,5 +129,23 @@ if ! iscmd subm; then
 		alias subm='subl-merge'
 	elif iscmd smerge; then
 		alias subm='smerge'
+	elif iscmd flatpak; then
+		if flatpak info com.sublimemerge.App >/dev/null 2>&1; then
+			alias subm='flatpak run com.sublimemerge.App'
+		fi
+	fi
+fi
+# Consistent name for Sublime Text
+if ! iscmd subl; then
+	if iscmd sublime_text; then
+		alias subl='sublime_text'
+	elif iscmd subl-text; then
+		alias subl='subl-text'
+	elif iscmd subl4; then
+		alias subl='subl4'
+	elif iscmd flatpak; then
+		if flatpak info com.sublimehq.SublimeText >/dev/null 2>&1; then
+			alias subl='flatpak run com.sublimehq.SublimeText'
+		fi
 	fi
 fi
