@@ -1,0 +1,12 @@
+// Documentation at https://www.sublimetext.com/docs/color_schemes.html
+{
+  "variables": {},
+  "globals": {},
+  "rules":
+  [
+    {
+      "scope": "comment,comment.block,comment.line,comment.block.documentation,punctuation.definition.comment,meta.toc-list",
+      "font_style": "normal"
+    },
+  ]
+}
