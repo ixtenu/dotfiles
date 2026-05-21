@@ -26,16 +26,16 @@ xterm*charClass: 33:48,35-47:48,58-59:48,61:48,63-64:48,95:48,126:48
 ! CS-h toggle alternate screen
 ! Shift-click opens selection (e.g., open selected URL in web browser)
 xterm*vt100.translations: #override \n\
-	Ctrl <Key> minus: smaller-vt-font() \n\
-	Ctrl <Key> plus: larger-vt-font() \n\
-	Ctrl <Key> 0: set-vt-font(d) \n\
-	Shift <KeyPress> Insert: insert-selection(CLIPBOARD) \n\
-	Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
-	Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
-	Ctrl Shift <Key>B: scroll-back(1, halfpage) \n\
-	Ctrl Shift <Key>F: scroll-forw(1, halfpage) \n\
-	Ctrl Shift <Key>H: set-altscreen(toggle) \n\
-	Shift <Btn1Up>: exec-formatted("xdg-open '%t'", PRIMARY) select-start() select-end()
+  Ctrl <Key> minus: smaller-vt-font() \n\
+  Ctrl <Key> plus: larger-vt-font() \n\
+  Ctrl <Key> 0: set-vt-font(d) \n\
+  Shift <KeyPress> Insert: insert-selection(CLIPBOARD) \n\
+  Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
+  Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+  Ctrl Shift <Key>B: scroll-back(1, halfpage) \n\
+  Ctrl Shift <Key>F: scroll-forw(1, halfpage) \n\
+  Ctrl Shift <Key>H: set-altscreen(toggle) \n\
+  Shift <Btn1Up>: exec-formatted("xdg-open '%t'", PRIMARY) select-start() select-end()
 
 ! only select text
 xterm*highlightSelection: true

@@ -3,31 +3,31 @@
 set -eu
 
 if [ $# -ne 1 ]; then
-	echo "usage: $0 block_device" 1>&2
-	echo "Overwrite the named block_device with pseudo-random data." 1>&2
-	exit 1
+  echo "usage: $0 block_device" 1>&2
+  echo "Overwrite the named block_device with pseudo-random data." 1>&2
+  exit 1
 fi
 
 bdev="$1"
 if [ ! -b "$bdev" ]; then
-	if [ -b "/dev/$bdev" ]; then
-		bdev="/dev/$bdev"
-	else
-		echo "$0: $bdev is not an existing block-special file" 1>&2
-		exit 1
-	fi
+  if [ -b "/dev/$bdev" ]; then
+    bdev="/dev/$bdev"
+  else
+    echo "$0: $bdev is not an existing block-special file" 1>&2
+    exit 1
+  fi
 fi
 
 pe=''
 if [ "$(id -u)" != "0" ]; then
-	if command -v doas >/dev/null 2>&1; then
-		pe='doas'
-	elif command -v sudo >/dev/null 2>&1; then
-		pe='sudo'
-	fi
+  if command -v doas >/dev/null 2>&1; then
+    pe='doas'
+  elif command -v sudo >/dev/null 2>&1; then
+    pe='sudo'
+  fi
 fi
 
 set -x
 time $pe dd if=/dev/urandom of="$bdev" \
-	bs=4M conv=fsync oflag=direct,sync status=progress
+  bs=4M conv=fsync oflag=direct,sync status=progress
 sync

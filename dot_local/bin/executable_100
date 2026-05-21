@@ -4,8 +4,8 @@ set -eu
 
 # see https://github.com/ixtenu/fp
 if ! command -v fp >/dev/null 2>&1; then
-	echo "$0: no fp found in PATH, please install it" 1>&2
-	exit 1
+  echo "$0: no fp found in PATH, please install it" 1>&2
+  exit 1
 fi
 
 fp -w100 "$@"

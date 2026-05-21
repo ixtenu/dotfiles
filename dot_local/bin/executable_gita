@@ -3,9 +3,9 @@
 
 # within Acme, if run without arguments, save and add current window
 if [ $# -eq 0 -a "$samfile" != "" ]; then
-	echo put | 9p write acme/$winid/ctl
-	git add "$samfile"
-	exit 0
+  echo put | 9p write acme/$winid/ctl
+  git add "$samfile"
+  exit 0
 fi
 
 git add "$@"

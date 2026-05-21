@@ -3,26 +3,26 @@
 set -eu
 
 if [ $# -ne 0 ]; then
-	echo "usage: $0" 1>&2
-	echo 'Health check-up for systems using ZFS.' 1>&2
-	exit 1
+  echo "usage: $0" 1>&2
+  echo 'Health check-up for systems using ZFS.' 1>&2
+  exit 1
 fi
 
 # Ensure this system has ZFS and Sanoid.
 bin='zfs zpool sanoid'
 for b in $bin; do
-	if ! command -v $b >/dev/null 2>&1; then
-		echo "error: $b executable not found in PATH" 1>&2
-		exit 1
-	fi
+  if ! command -v $b >/dev/null 2>&1; then
+    echo "error: $b executable not found in PATH" 1>&2
+    exit 1
+  fi
 done
 
 # On NixOS, sanoid.conf is kept in /nix/store and Sanoid doesn't know where to
 # find it, so we need to tell Sanoid its location.
 configarg=''
 if [ -d /etc/nixos ]; then
-	configdir="$(systemctl cat sanoid | rg 'sanoid\.conf' | awk '{print $4}' | tr -d "'")"
-	[ -d "$configdir" ] && configarg="--configdir=${configdir}"
+  configdir="$(systemctl cat sanoid | rg 'sanoid\.conf' | awk '{print $4}' | tr -d "'")"
+  [ -d "$configdir" ] && configarg="--configdir=${configdir}"
 fi
 
 # To avoid interfering with the sanoid system service, use a separate temporary
@@ -33,27 +33,27 @@ cachedir="$tmpd/cache"
 rundir="$tmpd/run"
 
 z() {
-	echo '== SYSTEM UPTIME =='
-	who -b | sed 's/^ *//'
-	uptime | sed 's/^ *//'
+  echo '== SYSTEM UPTIME =='
+  who -b | sed 's/^ *//'
+  uptime | sed 's/^ *//'
 
-	echo '== ZPOOL STATUS =='
-	zpool status
+  echo '== ZPOOL STATUS =='
+  zpool status
 
-	echo '== SANOID MONITOR: HEALTH =='
-	sanoid --monitor-health $configarg --cache-dir="$cachedir" --run-dir="$rundir"
+  echo '== SANOID MONITOR: HEALTH =='
+  sanoid --monitor-health $configarg --cache-dir="$cachedir" --run-dir="$rundir"
 
-	echo '== SANOID MONITOR: SNAPSHOTS =='
-	sanoid --monitor-snapshots $configarg --cache-dir="$cachedir" --run-dir="$rundir"
+  echo '== SANOID MONITOR: SNAPSHOTS =='
+  sanoid --monitor-snapshots $configarg --cache-dir="$cachedir" --run-dir="$rundir"
 
-	echo '== SANOID MONITOR: CAPACITY =='
-	sanoid --monitor-capacity $configarg --cache-dir="$cachedir" --run-dir="$rundir"
+  echo '== SANOID MONITOR: CAPACITY =='
+  sanoid --monitor-capacity $configarg --cache-dir="$cachedir" --run-dir="$rundir"
 
-	echo '== ZFS LIST =='
-	zfs list
+  echo '== ZFS LIST =='
+  zfs list
 
-	echo '== ZFS SNAPSHOTS =='
-	zfs list -t snapshot
+  echo '== ZFS SNAPSHOTS =='
+  zfs list -t snapshot
 }
 
 z | less
@@ -64,15 +64,15 @@ peb=''
 command -v sudo >/dev/null 2>&1 && peb='sudo'
 command -v doas >/dev/null 2>&1 && peb='doas'
 if [ ! -z "$peb" ]; then
-	if [ "$(uname)" = "Linux" ]; then
-		rf="/proc/sys/kernel/dmesg_restrict"
-		if [ -r "$rf" ] && [ "$(cat "$rf")" = "1" ]; then
-			pe="$peb"
-		fi
-	elif [ "$(uname)" = "FreeBSD" ]; then
-		un="$(sysctl security.bsd.unprivileged_read_msgbuf | awk '{print $2}')"
-		[ "$un" = "0" ] && pe="$peb"
-	fi
+  if [ "$(uname)" = "Linux" ]; then
+    rf="/proc/sys/kernel/dmesg_restrict"
+    if [ -r "$rf" ] && [ "$(cat "$rf")" = "1" ]; then
+      pe="$peb"
+    fi
+  elif [ "$(uname)" = "FreeBSD" ]; then
+    un="$(sysctl security.bsd.unprivileged_read_msgbuf | awk '{print $2}')"
+    [ "$un" = "0" ] && pe="$peb"
+  fi
 fi
 
 # Run dmesg to ensure the kernel hasn't panicked.

@@ -2,7 +2,7 @@
 # Can be sourced from .zshrc, .bashrc, .kshrc, etc.
 
 iscmd() {
-	command -v "$1" >/dev/null 2>&1
+  command -v "$1" >/dev/null 2>&1
 }
 
 alias df='df -h'
@@ -32,10 +32,10 @@ alias chgrp='chgrp --preserve-root'
 
 # Add directory to PATH if it exists and isn't already in PATH.
 addtopath() {
-	[ ! -d $1 ] && return
-	echo "$PATH" | grep ":$1$" >/dev/null && return
-	echo "$PATH" | grep ":$1:" >/dev/null && return
-	export PATH=$PATH:$1
+  [ ! -d $1 ] && return
+  echo "$PATH" | grep ":$1$" >/dev/null && return
+  echo "$PATH" | grep ":$1:" >/dev/null && return
+  export PATH=$PATH:$1
 }
 
 addtopath $HOME/bin
@@ -44,9 +44,9 @@ addtopath $HOME/go/bin
 addtopath $HOME/.cargo/bin
 
 if [ -d /usr/local/plan9 ]; then
-	export PLAN9=/usr/local/plan9
+  export PLAN9=/usr/local/plan9
 elif [ -d $HOME/plan9 ]; then
-	export PLAN9=$HOME/plan9
+  export PLAN9=$HOME/plan9
 fi
 [ ! -z "$PLAN9" ] && addtopath $PLAN9/bin
 
@@ -55,67 +55,67 @@ fi
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "freebsd") (eq .chezmoi.os "openbsd") }}
 vis_exe='vise'
 if iscmd $vis_exe; then
-	alias visu='/usr/bin/vis'
-	alias vis='vise'
+  alias visu='/usr/bin/vis'
+  alias vis='vise'
 fi
 {{- else }}
 vis_exe='vis'
 {{- end }}
 
 if iscmd $vis_exe; then
-	export EDITOR=$vis_exe
-	export VISUAL=$vis_exe
+  export EDITOR=$vis_exe
+  export VISUAL=$vis_exe
 fi
 
 # Short-hand for the default editor
 [ -n "$VISUAL" ] && alias e="$VISUAL"
 
 if iscmd fzf; then
-	fzp() {
-		if [ $# -lt 1 ]; then
-			echo "fzp: must specify a program name" 1>&2
-			return 1
-		fi
-		program="$1"
-		shift
-		"$program" "$@" $(fzf -m)
-	}
+  fzp() {
+    if [ $# -lt 1 ]; then
+      echo "fzp: must specify a program name" 1>&2
+      return 1
+    fi
+    program="$1"
+    shift
+    "$program" "$@" $(fzf -m)
+  }
 
-	fze() {
-		if [ -z "$VISUAL" ]; then
-			echo "fze: cannot open editor when VISUAL is unset"
-			return 1
-		fi
-		fzp "$VISUAL" "$@"
-	}
+  fze() {
+    if [ -z "$VISUAL" ]; then
+      echo "fze: cannot open editor when VISUAL is unset"
+      return 1
+    fi
+    fzp "$VISUAL" "$@"
+  }
 fi
 
 mkcd() {
-	if [ $# -eq 0 ]; then
-		echo "$0: missing operand" 1>&2
-		echo "usage: $0 directory" 1>&2
-		echo "mkdir and chdir into the given directory." 1>&2
-		return 1
-	fi
-	mkdir -p "$1"
-	cd "$1"
+  if [ $# -eq 0 ]; then
+    echo "$0: missing operand" 1>&2
+    echo "usage: $0 directory" 1>&2
+    echo "mkdir and chdir into the given directory." 1>&2
+    return 1
+  fi
+  mkdir -p "$1"
+  cd "$1"
 }
 
 upcd() {
-	dir=""
-	for i in $(seq 1 $1); do
-		dir="../$dir"
-	done
-	[ -z "$dir" ] && dir="$PWD"
-	cd "$dir"
+  dir=""
+  for i in $(seq 1 $1); do
+    dir="../$dir"
+  done
+  [ -z "$dir" ] && dir="$PWD"
+  cd "$dir"
 }
 
 lk() {
-	if ! iscmd walk; then
-		echo "lk: walk must be installed" 1>&2
-		return 1
-	fi
-	cd "$(walk "$@")"
+  if ! iscmd walk; then
+    echo "lk: walk must be installed" 1>&2
+    return 1
+  fi
+  cd "$(walk "$@")"
 }
 
 # Debian/Ubuntu renamed fd to fdfind due to a naming conflict.
@@ -123,29 +123,29 @@ iscmd fdfind && ! iscmd fd && alias fd='fdfind'
 
 # Consistent name for Sublime Merge
 if ! iscmd subm; then
-	if iscmd sublime_merge; then
-		alias subm='sublime_merge'
-	elif iscmd subl-merge; then
-		alias subm='subl-merge'
-	elif iscmd smerge; then
-		alias subm='smerge'
-	elif iscmd flatpak; then
-		if flatpak info com.sublimemerge.App >/dev/null 2>&1; then
-			alias subm='flatpak run com.sublimemerge.App'
-		fi
-	fi
+  if iscmd sublime_merge; then
+    alias subm='sublime_merge'
+  elif iscmd subl-merge; then
+    alias subm='subl-merge'
+  elif iscmd smerge; then
+    alias subm='smerge'
+  elif iscmd flatpak; then
+    if flatpak info com.sublimemerge.App >/dev/null 2>&1; then
+      alias subm='flatpak run com.sublimemerge.App'
+    fi
+  fi
 fi
 # Consistent name for Sublime Text
 if ! iscmd subl; then
-	if iscmd sublime_text; then
-		alias subl='sublime_text'
-	elif iscmd subl-text; then
-		alias subl='subl-text'
-	elif iscmd subl4; then
-		alias subl='subl4'
-	elif iscmd flatpak; then
-		if flatpak info com.sublimehq.SublimeText >/dev/null 2>&1; then
-			alias subl='flatpak run com.sublimehq.SublimeText'
-		fi
-	fi
+  if iscmd sublime_text; then
+    alias subl='sublime_text'
+  elif iscmd subl-text; then
+    alias subl='subl-text'
+  elif iscmd subl4; then
+    alias subl='subl4'
+  elif iscmd flatpak; then
+    if flatpak info com.sublimehq.SublimeText >/dev/null 2>&1; then
+      alias subl='flatpak run com.sublimehq.SublimeText'
+    fi
+  fi
 fi
