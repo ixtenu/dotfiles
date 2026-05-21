@@ -1,0 +1,99 @@
+# Defaults
+set case-sensitive-search auto
+set editorconfig true
+set scroll-margin 4
+set set-window-title true
+set text-width 80
+set ws-error "special,trailing"
+
+# Filetype-specific options
+option gitcommit text-width 72
+option json expand-tab true
+option json indent-width 2
+option meson expand-tab true
+option meson indent-width 2
+option zig expand-tab true
+option zig indent-width 4
+
+# Aliases
+alias cf 'bookmark; filter clang-format --style=file; bookmark -r; save'
+alias hl-paragraph 'blkup; right; bol; blkdown -l; left -c'
+alias reload-file 'close -p; open $FILE'
+alias x "exec -s chmod +x $FILE"
+
+# Bindings
+bind C-M-q 'toggle -v text-width 72 80 100'
+bind C-S-down scroll-down
+bind C-S-up scroll-up
+bind C-[ 'tag -r'
+bind C-\\ 'command filter\ '
+bind C-a bol
+bind C-b unselect
+bind C-d delete
+bind C-down blkdown
+bind C-e eol
+bind C-end eof
+bind C-home bof
+bind C-j join
+bind C-k delete-eol
+bind C-l 'center-view; refresh'
+bind C-n down
+bind C-p up
+bind C-u 'select -k'
+bind C-up blkup
+bind C-| 'command filter\ '
+bind F5 reload-file
+bind F6 'macro toggle'
+bind F7 'macro play'
+bind F9 sort-lines
+bind M-# 'toggle -v show-line-numbers'
+bind M-% match-bracket
+bind M-[ 'msg -p'
+bind M-] 'msg -n'
+bind M-d delete-word
+bind M-g 'command line\ '
+bind M-h 'wsplit -h'
+bind M-i 'toggle -v auto-indent'
+bind M-j 'hl-paragraph; filter fp'
+bind M-l 'case -l'
+bind M-m match-bracket
+bind M-n 'toggle -v show-line-numbers'
+bind M-o git-open
+bind M-p hl-paragraph
+bind M-q wrap-paragraph
+bind M-r reload-file
+bind M-u 'case -u'
+bind M-v wsplit
+bind M-w 'toggle -v display-special'
+bind M-y 'toggle -v syntax'
+bind M-{ 'shift -- -1'
+bind M-| 'command filter\ '
+bind M-} 'shift +1'
+
+# A subset of the default bindings (config/binding/default):
+# C-] jump to tag
+# C-c copy current line or selection
+# C-f enter search mode
+# C-g repeat search
+# C-n open new buffer
+# C-q quit
+# C-r replace
+# C-s save
+# C-t open new buffer
+# C-v paste
+# C-w close current buffer
+# C-x cut current line or selection
+# C-y redo
+# C-z undo
+# F3 repeat search
+# F4 repeat search backward
+# M-! move tab left
+# M-, previous document tab
+# M-. next document tab
+# M-< previous window
+# M-> next window
+# M-@ move tab right
+# M-[0-9] view document tab 1, 2, 3, etc.
+# M-t insert literal '\t'
+# M-x enter command mode
+# M-z suspend
