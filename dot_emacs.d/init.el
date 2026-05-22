@@ -172,12 +172,8 @@ exists and is not already present."
  '(almost-mono-themes :type git :host github :repo "ixtenu/almost-mono-themes"))
 (load-theme 'almost-mono-black t)
 
-;; GUI-only frame setup.  Routed through `after-make-frame-functions' so
-;; emacsclient frames created under --daemon receive the same treatment
-;; as a non-daemon initial frame (where `display-graphic-p' is t at init).
 (defvar my-gui-once-done nil
   "Non-nil after one-time GUI-only setup has run.")
-
 (defun my-setup-gui-frame (frame)
   "Apply GUI-only configuration when FRAME is graphical."
   (when (display-graphic-p frame)
@@ -201,9 +197,15 @@ exists and is not already present."
                  (not (find-font (font-spec :name "Symbols Nerd Font Mono"))))
         (nerd-icons-install-fonts t)))))
 
+;; GUI-only frame setup.  Routed through `after-make-frame-functions' so
+;; emacsclient frames created under --daemon receive the same treatment as a
+;; non-daemon initial frame (where `display-graphic-p' is t at init).
 (add-hook 'after-make-frame-functions #'my-setup-gui-frame)
-;; Apply to the initial frame for the non-daemon case.
-(my-setup-gui-frame (selected-frame))
+;; Apply to the initial frame for the non-daemon case.  Do this after startup is
+;; complete, after nerd-icons has been loaded.
+(defun my-setup-gui-frame-hook ()
+  (my-setup-gui-frame (selected-frame)))
+(add-hook 'emacs-startup-hook #'my-setup-gui-frame-hook())
 
 (use-package ligature
   :config
