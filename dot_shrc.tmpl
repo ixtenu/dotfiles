@@ -53,18 +53,15 @@ fi
 # The vis text editor installs as vise in *BSD userlands because there's a
 # vis(1) utility in the base system.
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "freebsd") (eq .chezmoi.os "openbsd") }}
-vis_exe='vise'
-if iscmd $vis_exe; then
+if iscmd vise; then
   alias visu='/usr/bin/vis'
   alias vis='vise'
 fi
-{{- else }}
-vis_exe='vis'
 {{- end }}
 
-if iscmd $vis_exe; then
-  export EDITOR=$vis_exe
-  export VISUAL=$vis_exe
+if iscmd emacs; then
+  export EDITOR='emacs -nw'
+  export VISUAL='emacs -nw'
 fi
 
 # Short-hand for the default editor
@@ -120,6 +117,12 @@ lk() {
 
 # Debian/Ubuntu renamed fd to fdfind due to a naming conflict.
 iscmd fdfind && ! iscmd fd && alias fd='fdfind'
+
+# GNU Emacs
+if iscmd emacs; then
+  alias ge='emacs -nw'
+  alias gec='emacsclient -n'
+fi
 
 # Consistent name for Sublime Merge
 if ! iscmd subm; then
