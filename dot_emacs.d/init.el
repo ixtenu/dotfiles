@@ -769,6 +769,10 @@ Bound to \\[my-fill-paragraph-kp]."
   (setq editorconfig-trim-whitespaces-mode 'ws-butler-mode)
   (editorconfig-mode 1))
 
+(with-eval-after-load 'eglot
+  (define-key eglot-mode-map (kbd "C-c l r") #'eglot-rename)
+  (define-key eglot-mode-map (kbd "C-c <f2>") #'eglot-rename))
+
 ;;;; Common Lisp:
 
 ;; Add extensions
