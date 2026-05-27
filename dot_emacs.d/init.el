@@ -823,6 +823,22 @@ Bound to \\[my-fill-paragraph-kp]."
 
 (add-hook 'c-mode-common-hook #'my-c-mode-common-hook)
 
+;; Format C/C++ buffers on save when `clang-format' is available and the file
+;; lives in a project with a `.clang-format' file.
+(when (executable-find "clang-format")
+  (use-package clang-format
+    :commands (clang-format-buffer))
+  (defun my-clang-format-on-save ()
+    "Run `clang-format-buffer' if a `.clang-format' file exists in the project."
+    (when (and buffer-file-name
+               (locate-dominating-file buffer-file-name ".clang-format"))
+      (clang-format-buffer)))
+  (defun my-clang-format-setup ()
+    "Install a buffer-local before-save hook to run clang-format."
+    (add-hook 'before-save-hook #'my-clang-format-on-save nil t))
+  (add-hook 'c-mode-hook #'my-clang-format-setup)
+  (add-hook 'c++-mode-hook #'my-clang-format-setup))
+
 ;;;; C:
 
 (setq-default c-tab-always-indent nil)
