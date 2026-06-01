@@ -237,6 +237,18 @@ exists and is not already present."
 
 (setq frame-resize-pixelwise t) ; No gaps around "maximized" window.
 
+;; Distraction-free writing.
+(use-package olivetti
+  :bind ("C-c z" . olivetti-mode))
+
+(defun my-olivetti-focus ()
+  "Close other windows, fullscreen the frame, and toggle `olivetti-mode'."
+  (interactive)
+  (delete-other-windows)
+  (toggle-frame-fullscreen)
+  (olivetti-mode 'toggle))
+(global-set-key (kbd "S-<f11>") #'my-olivetti-focus)
+
 ;;;; Project Management:
 
 ;;; For projectile-ripgrep.
