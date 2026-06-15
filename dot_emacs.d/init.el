@@ -451,6 +451,10 @@ instead of replacing the text in region."
     (flyspell-buffer)))
 (global-set-key (kbd "<f6>") #'my-flyspell-toggle)
 
+(global-set-key (kbd "M-u") 'upcase-dwim)
+(global-set-key (kbd "M-l") 'downcase-dwim)
+(global-set-key (kbd "M-c") 'capitalize-dwim)
+
 ;; my-open-line functions from: https://stackoverflow.com/a/2173393
 ;; (c) seh, CC BY-SA 4.0
 
