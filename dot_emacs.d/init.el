@@ -136,6 +136,8 @@ exists and is not already present."
 
 (setq mouse-autoselect-window t) ; window focus follows mouse
 
+(setq view-read-only t) ; auto-enable view mode in read-only buffers
+
 ;;;; Appearance (UI Elements):
 
 (setq inhibit-startup-screen t)
