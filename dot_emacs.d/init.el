@@ -791,6 +791,21 @@ Bound to \\[my-fill-paragraph-kp]."
   (define-key eglot-mode-map (kbd "C-c l r") #'eglot-rename)
   (define-key eglot-mode-map (kbd "C-c <f2>") #'eglot-rename))
 
+;; Only configure the Claude Code IDE integration when the `claude' CLI is
+;; available.  Uses the `eat' terminal backend rather than `vterm': `eat' is a
+;; pure-Elisp terminal emulator, so it avoids the native libvterm compilation
+;; that is awkward on NixOS.
+(when (executable-find "claude")
+  (use-package eat
+    :commands eat)
+  (use-package claude-code-ide
+    :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
+    :bind ("C-c C-'" . claude-code-ide-menu)
+    :init
+    (setq claude-code-ide-terminal-backend 'eat)
+    :config
+    (claude-code-ide-emacs-tools-setup)))
+
 ;;;; Common Lisp:
 
 ;; Add extensions
