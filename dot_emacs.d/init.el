@@ -174,6 +174,12 @@ exists and is not already present."
  '(almost-mono-themes :type git :host github :repo "ixtenu/almost-mono-themes"))
 (load-theme 'almost-mono-black t)
 
+(defvar my-preferred-gui-font
+  "Cascadia Code 12"
+  ;; "Iosevka 14"
+  ;; "Fixedsys Excelsior 3.01 12"
+  "Preferred font for GUI frames.")
+
 (defvar my-gui-once-done nil
   "Non-nil after one-time GUI-only setup has run.")
 (defun my-setup-gui-frame (frame)
@@ -184,7 +190,7 @@ exists and is not already present."
       (set-mouse-color "white")
       ;; Ignore errors in case the configured font is not (yet) installed.
       (ignore-errors
-        (set-frame-font "Cascadia Code 12" t t)))
+        (set-frame-font my-preferred-gui-font t t)))
     (unless my-gui-once-done
       (setq my-gui-once-done t)
       ;; Clock in modeline.  Only done for GUI frames (terminal modelines are
