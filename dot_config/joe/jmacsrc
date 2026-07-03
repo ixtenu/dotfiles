@@ -52,7 +52,7 @@
  -exask		^KX always confirms file name
  -beep		Beep on errors and when cursor goes past extremes
  -nosta		Disable top-most status line
- -keepup	%k and %c status line escape sequences updated frequently
+-keepup		%k and %c status line escape sequences updated frequently
 -pg 1		No. lines to keep for PgUp/PgDn
 -undo_keep 0	Number of undo records to keep.  0 for infinite.
 
