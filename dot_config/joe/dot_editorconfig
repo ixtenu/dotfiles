@@ -1,0 +1,4 @@
+[*]
+# JOE rc files use hard tabs to minimize differences with upstream rc files.
+indent_style = tab
+indent_size = 8
