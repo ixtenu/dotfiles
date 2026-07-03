@@ -32,7 +32,7 @@
  -left nn	Amount to jump left when scrolling is necessary (-1 for 1/4 width)
  -right nn	Amount to jump right when scrolling is necessary (-1 for 1/4 width)
 
--marking	Text between ^KB and cursor is highlighted (use with -lightoff)
+ -marking	Text between ^KB and cursor is highlighted (use with -lightoff)
 
  -asis		Characters 128 - 255 shown as-is
 

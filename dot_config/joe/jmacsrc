@@ -31,8 +31,8 @@
 -mid		Cursor is recentered when scrolling is necessary
  -left nn	Amount to jump left when scrolling is necessary (-1 for 1/4 width)
  -right nn	Amount to jump right when scrolling is necessary (-1 for 1/4 width)
--marking	Text between ^KB and cursor is highlighted
--lightoff	Turn off highlighting after block copy or move
+ -marking	Text between ^KB and cursor is highlighted
+ -lightoff	Turn off highlighting after block copy or move
  -asis		Characters 128 - 255 shown as-is
 -force		Force final newline when files are saved
 -nolocks	If you don't want file locks to be used
