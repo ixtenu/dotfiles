@@ -1,6 +1,6 @@
 [font]
-normal = { family = "Iosevka", style = "Regular" }
-size = 14.0
+normal = { family = "Cascadia Code", style = "Regular" }
+size = 12.0
 
 [window]
 dimensions = { columns = 80, lines = 24 }

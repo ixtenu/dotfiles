@@ -175,8 +175,8 @@ exists and is not already present."
 (load-theme 'almost-mono-black t)
 
 (defvar my-preferred-gui-font
-  "Iosevka 14"
-  ;; "Cascadia Code 12"
+  "Cascadia Code 12"
+  ;; "Iosevka 14"
   ;; "Fixedsys Excelsior 3.01 12"
   "Preferred font for GUI frames.")
 
