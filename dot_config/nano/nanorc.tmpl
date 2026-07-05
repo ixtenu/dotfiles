@@ -1,0 +1,45 @@
+# see nanorc(5) for documentation of these options
+set atblanks
+set cutfromcursor
+set fill 80
+set quickblank
+set smarthome
+{{- if ne .chezmoi.os "windows" }}
+set speller "aspell -x -c"
+{{- end }}
+set trimblanks
+set zero
+
+# nano v8.0 changed the Ctrl-[fb] and Alt-[fb] key bindings.
+# Restore the traditional pre-8.0 key bindings.
+bind ^F forward main
+bind ^B back main
+bind M-F formatter main
+bind M-B linter main
+
+# Remove trailing whitespace and save.  Note this has a mildly disruptive side
+# effect: it moves the cursor to column 1.  Thus, it's given a new key binding
+# here, rather than rebinding ^S like the sample nanorc does.
+bind M-' "{execute}| sed 's/[[:space:]]*$//' {enter}{savefile}" main
+
+# Override tabstospaces in makefiles: always use hard tabs
+extendsyntax makefile tabgives "	"
+
+# Some nano packages don't install a system-wide nanorc, leading to a rather
+# impoverished experience.
+#
+# Location of system-wide nanorc:
+# /etc/nanorc            --> Linux, OpenBSD, MS-Windows Git Bash
+# /usr/local/etc/nanorc  --> FreeBSD
+# C:\ProgramData\nanorc  --> MS-Windows (lhmouse/nano-win)
+#
+# Contents of the system-wide nanorc to enable syntax highlighting:
+#
+## Linux or Git Bash:
+# include "/usr/share/nano/*.nanorc"
+## FreeBSD or OpenBSD:
+# include "/usr/local/share/nano/*.nanorc"
+## MS-Windows (Chocolatey nano-win package):
+# include "C:/ProgramData/chocolatey/lib/nano-win/tools/pkg_x86_64-w64-mingw32/share/nano/*.nanorc"
+## MS-Windows (manual installation): use the install path, e.g.:
+# include "C:/Program Files/nano/share/nano/*.nanorc"
