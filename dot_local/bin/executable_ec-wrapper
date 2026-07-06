@@ -5,7 +5,9 @@
 set -eu
 
 iscmd() {
-  command -v "$(echo "$1" | awk '{print $1}')" >/dev/null 2>&1
+  bin="$(echo "$1" | awk '{print $1}')"
+  binfp="$(command -v "$bin" || echo "")"
+  test -x "$binfp"
 }
 
 editor=
@@ -83,7 +85,7 @@ if [ -n "$fname" ] && iscmd editorconfig; then
 fi
 
 # == GNU nano ==
-if [ "$editor" == "nano" ]; then
+if [ "$editor" = "nano" ]; then
   if [ "$indent_style" = "space" ]; then
     edopt="$edopt --tabstospaces"
   elif [ "$indent_style" = "tab" ]; then
@@ -107,10 +109,10 @@ if [ "$editor" == "nano" ]; then
     edopt="$edopt --fill=72 --breaklonglines"
   fi
 # == Joe's Own Editor ==
-elif [ "$editor" == "joe" ] \
-  || [ "$editor" == "jmacs" ] \
-  || [ "$editor" == "jpico" ] \
-  || [ "$editor" == "jstar" ]; then
+elif [ "$editor" = "joe" ] \
+  || [ "$editor" = "jmacs" ] \
+  || [ "$editor" = "jpico" ] \
+  || [ "$editor" = "jstar" ]; then
   if [ -n "$indent_style" ] || [ -n "$indent_size" ]; then
     edopt="$edopt --guess_indent"
   fi
@@ -137,7 +139,7 @@ elif [ "$editor" == "joe" ] \
     edopt="$edopt -rmargin 72 -wordwrap"
   fi
 # == godit (patched version) ==
-elif [ "$editor" == "godit" ]; then
+elif [ "$editor" = "godit" ]; then
   # NOTE: Upstream godit does not have -e or -t options.  The below is only
   # compatible with a fork which has been patched to add them, e.g.:
   # <https://github.com/ixtenu/godit>
