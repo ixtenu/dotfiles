@@ -5,19 +5,23 @@
 set -eu
 
 iscmd() {
-  command -v "$1" >/dev/null 2>&1
+  command -v "$(echo "$1" | awk '{print $1}')" >/dev/null 2>&1
 }
 
-if [ $# -lt 1 ]; then
-  echo "$(basename $0): first argument must be the text editor program name" 1>&2
+editor=
+editor="${EDITOR:-$editor}"
+editor="${VISUAL:-$editor}"
+editor="${EC_WRAPPER_EDITOR:-$editor}"
+if [ $# -ge 1 ] && iscmd "$1"; then
+  editor="$1"
+  shift
+fi
+if [ -z "$editor" ]; then
+  echo "$(basename $0): no text editor program name provided" 1>&2
   exit 1
 fi
-
-edname="$1"
-shift
-
-if ! iscmd "$edname"; then
-  echo "$(basename $0): no $edname found in PATH, please install it" 1>&2
+if ! iscmd "$editor"; then
+  echo "$(basename $0): no $editor found in PATH, please install it" 1>&2
   exit 1
 fi
 
@@ -37,6 +41,12 @@ for f in $@; do
   fcount=$((fcount+1))
 done
 
+# Is the editor being invoked to write a commit message?
+git_commit="no"
+if [ $fcount -eq 1 ] && [ "$(basename "$fname")" = "COMMIT_EDITMSG" ]; then
+  git_commit="yes"
+fi
+
 # editorconfig wants full paths.
 if [ -n "$fname" ]; then
   if [ "$(uname)" = "OpenBSD" ] && [ ! -e "$fname" ]; then
@@ -51,6 +61,11 @@ fi
 # By default, invoke the editor with no extra options.
 edopt=
 
+indent_style=
+indent_size=
+insert_final_newline=
+trim_trailing_whitespace=
+end_of_line=
 if [ -n "$fname" ] && iscmd editorconfig; then
   # Create a temporary file which is deleted on exit.
   tmpf="$(mktemp)"
@@ -65,85 +80,79 @@ if [ -n "$fname" ] && iscmd editorconfig; then
   insert_final_newline="$(grep '^insert_final_newline=' "$tmpf" | sed 's/^insert_final_newline=//')"
   trim_trailing_whitespace="$(grep '^trim_trailing_whitespace=' "$tmpf" | sed 's/^trim_trailing_whitespace=//')"
   end_of_line="$(grep '^end_of_line=' "$tmpf" | sed 's/^end_of_line=//')"
-
-  # Is the editor being invoked to write a commit message?
-  git_commit="no"
-  if [ $fcount -eq 1 ] && [ "$(basename "$fname")" = "COMMIT_EDITMSG" ]; then
-    git_commit="yes"
-  fi
-
-  # == GNU nano ==
-  if [ "$edname" == "nano" ]; then
-    if [ "$indent_style" = "space" ]; then
-      edopt="$edopt --tabstospaces"
-    elif [ "$indent_style" = "tab" ]; then
-      # nano doesn't have an option which forces hard tabs.  However, hard tabs
-      # are the default behavior, so simply not using an option will work --
-      # unless "set tabstospaces" has been put into the nanorc, which we have no
-      # way to override here, so don't do that if you want this script to work.
-      true
-    fi
-    if [ -n "$indent_size" ]; then
-      edopt="$edopt --tabsize=$indent_size"
-    fi
-    if [ "$insert_final_newline" = "false" ]; then
-      edopt="$edopt --nonewlines"
-    else
-      # Like indent_style=tab, there is no option for this but it is the default
-      # behavior, unless nanorc overrides it.
-      true
-    fi
-    if [ "$git_commit" = "yes" ]; then
-      edopt="$edopt --fill=72 --breaklonglines"
-    fi
-  # == Joe's Own Editor ==
-  elif [ "$edname" == "joe" ] \
-    || [ "$edname" == "jmacs" ] \
-    || [ "$edname" == "jpico" ] \
-    || [ "$edname" == "jstar" ]; then
-    if [ -n "$indent_style" ] || [ -n "$indent_size" ]; then
-      edopt="$edopt --guess_indent"
-    fi
-    if [ "$indent_style" = "space" ]; then
-      edopt="$edopt -spaces -indentc 32"
-    elif [ "$indent_style" = "tab" ]; then
-      edopt="$edopt --spaces -indentc 9 -istep 1"
-    fi
-    if [ -n "$indent_size" ]; then
-      edopt="$edopt -tab $indent_size"
-      if [ "$indent_style" = "space" ]; then
-        edopt="$edopt -istep $indent_size"
-      fi
-    fi
-    if [ "$insert_final_newline" = "true" ]; then
-      edopt="$edopt -force"
-    elif [ "$insert_final_newline" = "false" ]; then
-      edopt="$edopt --force"
-    fi
-    if [ "$end_of_line" = "crlf" ]; then
-      edopt="$edopt -crlf"
-    fi
-    if [ "$git_commit" = "yes" ]; then
-      edopt="$edopt -rmargin 72 -wordwrap"
-    fi
-  # == godit (patched version) ==
-  elif [ "$edname" == "godit" ]; then
-    # NOTE: Upstream godit does not have -e or -t options.  The below is only
-    # compatible with a fork which has been patched to add them, e.g.:
-    # <https://github.com/ixtenu/godit>
-    if [ "$indent_style" = "space" ]; then
-      edopt="$edopt -e"
-    elif [ "$indent_style" = "tab" ]; then
-      # This is the default behavior.
-      true
-    fi
-    if [ -n "$indent_size" ]; then
-      edopt="$edopt -t $indent_size"
-    fi
-  # == Unsupported text editor ==
-  else
-    true
-  fi
 fi
 
-exec "$edname" $edopt "$@"
+# == GNU nano ==
+if [ "$editor" == "nano" ]; then
+  if [ "$indent_style" = "space" ]; then
+    edopt="$edopt --tabstospaces"
+  elif [ "$indent_style" = "tab" ]; then
+    # nano doesn't have an option which forces hard tabs.  However, hard tabs
+    # are the default behavior, so simply not using an option will work --
+    # unless "set tabstospaces" has been put into the nanorc, which we have no
+    # way to override here, so don't do that if you want this script to work.
+    true
+  fi
+  if [ -n "$indent_size" ]; then
+    edopt="$edopt --tabsize=$indent_size"
+  fi
+  if [ "$insert_final_newline" = "false" ]; then
+    edopt="$edopt --nonewlines"
+  else
+    # Like indent_style=tab, there is no option for this but it is the default
+    # behavior, unless nanorc overrides it.
+    true
+  fi
+  if [ "$git_commit" = "yes" ]; then
+    edopt="$edopt --fill=72 --breaklonglines"
+  fi
+# == Joe's Own Editor ==
+elif [ "$editor" == "joe" ] \
+  || [ "$editor" == "jmacs" ] \
+  || [ "$editor" == "jpico" ] \
+  || [ "$editor" == "jstar" ]; then
+  if [ -n "$indent_style" ] || [ -n "$indent_size" ]; then
+    edopt="$edopt --guess_indent"
+  fi
+  if [ "$indent_style" = "space" ]; then
+    edopt="$edopt -spaces -indentc 32"
+  elif [ "$indent_style" = "tab" ]; then
+    edopt="$edopt --spaces -indentc 9 -istep 1"
+  fi
+  if [ -n "$indent_size" ]; then
+    edopt="$edopt -tab $indent_size"
+    if [ "$indent_style" = "space" ]; then
+      edopt="$edopt -istep $indent_size"
+    fi
+  fi
+  if [ "$insert_final_newline" = "true" ]; then
+    edopt="$edopt -force"
+  elif [ "$insert_final_newline" = "false" ]; then
+    edopt="$edopt --force"
+  fi
+  if [ "$end_of_line" = "crlf" ]; then
+    edopt="$edopt -crlf"
+  fi
+  if [ "$git_commit" = "yes" ]; then
+    edopt="$edopt -rmargin 72 -wordwrap"
+  fi
+# == godit (patched version) ==
+elif [ "$editor" == "godit" ]; then
+  # NOTE: Upstream godit does not have -e or -t options.  The below is only
+  # compatible with a fork which has been patched to add them, e.g.:
+  # <https://github.com/ixtenu/godit>
+  if [ "$indent_style" = "space" ]; then
+    edopt="$edopt -e"
+  elif [ "$indent_style" = "tab" ]; then
+    # This is the default behavior.
+    true
+  fi
+  if [ -n "$indent_size" ]; then
+    edopt="$edopt -t $indent_size"
+  fi
+# == Unsupported text editor ==
+else
+  true
+fi
+
+exec $editor $edopt "$@"
