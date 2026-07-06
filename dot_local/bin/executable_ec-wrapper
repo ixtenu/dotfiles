@@ -59,8 +59,6 @@ if [ -n "$fname" ] && iscmd editorconfig; then
   # no .editorconfig file is found, this will write an empty file.
   editorconfig "$fname" > "$tmpf"
 
-  cat "$tmpf"
-
   # Extract editorconfig options
   indent_style="$(grep '^indent_style=' "$tmpf" | sed 's/^indent_style=//')"
   indent_size="$(grep '^indent_size=' "$tmpf" | sed 's/^indent_size=//')"
@@ -127,6 +125,20 @@ if [ -n "$fname" ] && iscmd editorconfig; then
     fi
     if [ "$git_commit" = "yes" ]; then
       edopt="$edopt -rmargin 72 -wordwrap"
+    fi
+  # == godit (patched version) ==
+  elif [ "$edname" == "godit" ]; then
+    # NOTE: Upstream godit does not have -e or -t options.  The below is only
+    # compatible with a fork which has been patched to add them, e.g.:
+    # <https://github.com/ixtenu/godit>
+    if [ "$indent_style" = "space" ]; then
+      edopt="$edopt -e"
+    elif [ "$indent_style" = "tab" ]; then
+      # This is the default behavior.
+      true
+    fi
+    if [ -n "$indent_size" ]; then
+      edopt="$edopt -t $indent_size"
     fi
   # == Unsupported text editor ==
   else

@@ -155,12 +155,10 @@ fi
 
 # Joe's Own Editor
 if iscmd joe; then
-  # EditorConfig wrapper script
   alias joe='ec-wrapper joe'
   alias jmacs='ec-wrapper jmacs'
   alias jpico='ec-wrapper jpico'
   alias jstar='ec-wrapper jstar'
-  # Shorthand
   alias jo='joe'
   alias jm='jmacs'
   alias jp='jpico'
@@ -169,10 +167,14 @@ fi
 
 # GNU nano
 if iscmd nano; then
-  # EditorConfig wrapper script
   alias nano='ec-wrapper nano'
-  # Shorthand
   alias na='nano'
+fi
+
+# godit
+if iscmd godit; then
+  alias godit='ec-wrapper godit'
+  alias gd='godit'
 fi
 
 # Machine-local customizations (must be last)
