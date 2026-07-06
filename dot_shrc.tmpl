@@ -174,3 +174,6 @@ if iscmd nano; then
   # Shorthand
   alias na='nano'
 fi
+
+# Machine-local customizations (must be last)
+[ -f "$HOME/.shrc-local" ] && source "$HOME/.shrc-local"
