@@ -59,10 +59,9 @@ if iscmd vise; then
 fi
 {{- end }}
 
-if iscmd emacs; then
-  export EDITOR='emacs -nw'
-  export VISUAL='emacs -nw'
-fi
+export EC_WRAPPER_EDITOR='joe'
+export EDITOR='ec-wrapper'
+export VISUAL='ec-wrapper'
 
 # Short-hand for the default editor
 [ -n "$VISUAL" ] && alias e="$VISUAL"
