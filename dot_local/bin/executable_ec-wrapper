@@ -136,7 +136,7 @@ elif [ "$editor" = "joe" ] \
     edopt="$edopt -crlf"
   fi
   if [ "$git_commit" = "yes" ]; then
-    edopt="$edopt -rmargin 72 -wordwrap"
+    edopt="$edopt -rmargin 72 -wordwrap --restore"
   fi
 # == godit (patched version) ==
 elif [ "$editor" = "godit" ]; then
