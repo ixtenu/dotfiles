@@ -24,6 +24,24 @@ prompt_custom_setup() {
 prompt_themes+=(custom)
 prompt custom
 
+if [ "$TERM" = "foot" ]; then
+  # make CS-n open new shells in $PWD
+  function osc7-pwd() {
+    emulate -L zsh # also sets localoptions for us
+    setopt extendedglob
+    local LC_ALL=C
+    printf '\e]7;file://%s%s\e\\' $HOST ${PWD//(#m)([^@-Za-z&-;_~])/%${(l:2::0:)$(([##16]#MATCH))}}
+  }
+  function chpwd-osc7-pwd() {
+    (( ZSH_SUBSHELL )) || osc7-pwd
+  }
+  add-zsh-hook -Uz chpwd chpwd-osc7-pwd
+  # support jumping between prompts with CS-z and CS-x
+  precmd() {
+    print -Pn "\e]133;A\e\\"
+  }
+fi
+
 # zsh plugin directory varies by system.
 zshplugdir=""
 if [ -d "/usr/share/zsh/plugins/" ]; then
