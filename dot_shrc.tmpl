@@ -176,5 +176,10 @@ if iscmd godit; then
   alias gd='godit'
 fi
 
+# work around https://github.com/martanne/vis/issues/1252
+if [ "$TERM" = "foot" ]; then
+  alias vis='TERM=xterm-256color vis'
+fi
+
 # Machine-local customizations (must be last)
 [ -f "$HOME/.shrc-local" ] && source "$HOME/.shrc-local"
