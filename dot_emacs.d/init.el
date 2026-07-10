@@ -99,6 +99,10 @@
 (use-package restart-emacs
   :commands restart-emacs)
 
+;; Tell EasyPG to prompt for password with Emacs.  This is reverted once a GUI
+;; frame is opened (see `my-setup-gui-frame').
+(setq epg-pinentry-mode 'loopback)
+
 (defun my-add-to-path (newpath)
   "Add NEWPATH to `exec-path' and the PATH environment variable, if it
 exists and is not already present."
@@ -203,7 +207,9 @@ exists and is not already present."
       ;; graphical font backend to give meaningful answers.
       (when (and (fboundp 'nerd-icons-install-fonts)
                  (not (find-font (font-spec :name "Symbols Nerd Font Mono"))))
-        (nerd-icons-install-fonts t)))))
+        (nerd-icons-install-fonts t))
+      ;; Once a GUI frame is opened, allow PIN entry via GUI popup.
+      (setq epg-pinentry-mode nil))))
 
 ;; GUI-only frame setup.  Routed through `after-make-frame-functions' so
 ;; emacsclient frames created under --daemon receive the same treatment as a
