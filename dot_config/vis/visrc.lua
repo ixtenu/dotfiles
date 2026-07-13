@@ -175,5 +175,5 @@ vis:operator_new("gq", function(file, range, pos)
 end, "Rewrap text operator")
 
 -- shortcuts for gq operator
-vis:map(vis.modes.NORMAL, 'Q', 'gqap')
+vis:map(vis.modes.NORMAL, 'Q', 'gqap}h')
 vis:map(vis.modes.INSERT, '<M-q>', '<Escape>gqap}ha')
