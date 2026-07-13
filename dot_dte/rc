@@ -54,7 +54,7 @@ bind M-d delete-word
 bind M-g 'command line\ '
 bind M-h 'wsplit -h'
 bind M-i 'toggle -v auto-indent'
-bind M-j 'hl-paragraph; filter fp'
+bind M-j 'hl-paragraph; filter fp; blkdown; left'
 bind M-l 'case -l'
 bind M-m match-bracket
 bind M-n 'toggle -v show-line-numbers'
