@@ -1241,6 +1241,8 @@ nextword	^X		Goto next word
 open		^]		Split line
 prevpos		^K -		Previous position in history
 prevword	^Z		Previous word
+recenter	^K ^N		Recenter and refresh screen
+recenter	^K n
 reload		^K `		Revert file
 redo		^^		Redo changes
 rindent		^K .		Indent to right
