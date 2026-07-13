@@ -884,12 +884,12 @@ extmouse	^[ [ <		Introduces an extended xterm mouse event
  Spell-check macros
 
  Ispell
-:def ispellfile filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\"cat >$SPLTMP;ispell $SPLTMP </dev/tty >/dev/tty;cat $SPLTMP;/bin/rm $SPLTMP",rtn,retype
-:def ispellword psh,nextword,markk,prevword,markb,filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\"cat >$SPLTMP;ispell $SPLTMP </dev/tty >/dev/tty;tr -d <$SPLTMP '\\012';/bin/rm $SPLTMP",rtn,retype,nextword
+:def ispellfile filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\"cat >$SPLTMP;ispell $SPLTMP </dev/tty >/dev/tty;cat $SPLTMP;rm $SPLTMP",rtn,retype
+:def ispellword psh,nextword,markk,prevword,markb,filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\"cat >$SPLTMP;ispell $SPLTMP </dev/tty >/dev/tty;tr -d <$SPLTMP '\\012';rm $SPLTMP",rtn,retype,nextword
 
  Aspell
-:def aspellfile filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\";cat >$SPLTMP;aspell --lang=",language,".",charset," -x -c $SPLTMP </dev/tty >/dev/tty;cat $SPLTMP;/bin/rm $SPLTMP",rtn,retype
-:def aspellword psh,nextword,markk,prevword,markb,filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\";cat >$SPLTMP;aspell --lang=",language,".",charset," -x -c $SPLTMP </dev/tty >/dev/tty;tr -d <$SPLTMP '\\012';/bin/rm $SPLTMP",rtn,retype,nextword,pop
+:def aspellfile filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\";cat >$SPLTMP;aspell --lang=",language,".",charset," -x -c $SPLTMP </dev/tty >/dev/tty;cat $SPLTMP;rm $SPLTMP",rtn,retype
+:def aspellword psh,nextword,markk,prevword,markb,filt,"SPLTMP=\"$(mktemp -p '' joeXXXXXX)\";cat >$SPLTMP;aspell --lang=",language,".",charset," -x -c $SPLTMP </dev/tty >/dev/tty;tr -d <$SPLTMP '\\012';rm $SPLTMP",rtn,retype,nextword,pop
 
 aspellfile	^[ l
 aspellword	^[ n
