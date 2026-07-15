@@ -5,6 +5,8 @@ set scroll-margin 4
 set set-window-title true
 set text-width 80
 set ws-error "special,trailing"
+set expand-tab true
+set indent-width 2
 
 # Filetype-specific options
 option gitcommit text-width 72
