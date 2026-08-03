@@ -7,8 +7,8 @@ xterm*background: rgb:18/18/18
 xterm*foreground: rgb:d8/d8/d8
 
 ! font & appearance
-xterm*faceName: IosevkaTerm Nerd Font Mono
-xterm*faceSize: 14
+xterm*faceName: Cascadia Mono
+xterm*faceSize: 12
 xterm*renderFont: true
 xterm*boldMode: false
 xterm*internalBorder: 4
