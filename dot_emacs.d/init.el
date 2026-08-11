@@ -289,6 +289,12 @@ exists and is not already present."
 (use-package zygospore
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
 
+;; Transient menus.  Useful for packages which expose a large command family:
+;; the whole family hangs off a single key instead of consuming one `C-c
+;; <letter>' binding each.  Loaded eagerly because `defhydra' is a macro, so it
+;; must be available when the menu definitions below are evaluated.
+(use-package hydra)
+
 ;;;; Navigation:
 
 ;; Easier window navigation
@@ -755,6 +761,81 @@ Bound to \\[my-fill-paragraph-kp]."
 ;; Don't use a different font for code.
 (with-eval-after-load 'markdown-mode
   (set-face-attribute 'markdown-code-face nil :inherit 'default))
+
+;; Obsidian <https://obsidian.md/> integration.
+(use-package obsidian
+  :config
+  (global-obsidian-mode t)
+  :custom
+  (obsidian-directory "~/obsidian/main")
+  (obsidian-inbox-directory "inbox")
+  (obsidian-daily-notes-directory "daily")
+  (markdown-enable-wiki-links t)
+  :bind (:map obsidian-mode-map
+              ("C-c C-n" . obsidian-capture)
+              ("C-c C-l" . obsidian-insert-wikilink)
+              ("C-c C-o" . obsidian-follow-link-at-point)
+              ("C-c C-p" . obsidian-jump)
+              ("C-c C-b" . obsidian-backlink-jump)))
+
+;; obsidian.el exposes more commands than are worth spending a `C-c' binding on
+;; each, and the bundled `obsidian-hydra' covers only nine of them, so define a
+;; fuller menu here.
+;;
+;; Heads exit the menu by default.  The cache and panel heads are red so they
+;; stay open and can be repeated: none of them move point, so there is no buffer
+;; switch to swallow the next keystroke.
+;;
+;; Bound globally rather than in `obsidian-mode-map' because several of these
+;; commands (jump, search, capture, daily note, change vault) are worth reaching
+;; from a buffer outside the vault.
+(defhydra my-obsidian-hydra (:color blue :hint nil)
+  "
+Obsidian
+"
+  ("j" obsidian-jump "jump to note" :column "Navigate")
+  ("f" obsidian-follow-link-at-point "follow link")
+  ("," obsidian-jump-back "jump back")
+  ("s" obsidian-search "search text")
+  ("t" obsidian-find-tag "search tag")
+
+  ("b" obsidian-backlink-jump "jump to link" :column "Backlinks")
+  ("B" obsidian-backlinks-window "visit panel")
+  ("p" obsidian-toggle-backlinks-panel "toggle panel" :color red)
+  ("P" obsidian-backlinks-set-panel-width "panel width" :color red)
+
+  ("c" obsidian-capture "capture note" :column "Edit")
+  ("n" obsidian-daily-note "daily note")
+  ("w" obsidian-insert-wikilink "insert wikilink")
+  ("l" obsidian-insert-link "insert md link")
+  ("#" obsidian-insert-tag "insert tag")
+  ("k" obsidian-remove-link "remove link")
+  ("m" obsidian-move-file "move/rename")
+
+  ("v" obsidian-change-vault "change vault" :column "Vault")
+  ("u" obsidian-update "update cache" :color red)
+  ("r" obsidian-rescan-buffer "rescan buffer" :color red)
+  ("R" obsidian-rescan-cache "rescan vault" :color red)
+  ("a" obsidian-start-update-timer "auto-update on" :color red)
+  ("A" obsidian-stop-update-timer "auto-update off" :color red)
+  ("q" nil "quit"))
+
+(global-set-key (kbd "C-c n") #'my-obsidian-hydra/body)
+
+;; The Obsidian application soft-wraps notes and never inserts hard line breaks,
+;; so for consistency do the same from GNU Emacs: turn `auto-fill-mode' off
+;; inside the vault.
+;;
+;; This relies on hook order: `global-obsidian-mode' enables `obsidian-mode' via
+;; `after-change-major-mode-hook', which `run-mode-hooks' runs after the major
+;; mode's own hooks.  So this fires after `my-text-mode-hook' has enabled
+;; `auto-fill-mode' and wins.
+(defun my-obsidian-mode-hook ()
+  "Disable `auto-fill-mode' in Obsidian notes.
+Guarded on `obsidian-mode' because minor mode hooks also run on exit."
+  (when obsidian-mode
+    (auto-fill-mode 0)))
+(add-hook 'obsidian-mode-hook #'my-obsidian-mode-hook)
 
 ;;;; Org:
 
