@@ -870,11 +870,6 @@ Guarded on `obsidian-mode' because minor mode hooks also run on exit."
     (display-line-numbers-mode 1)))
 (add-hook 'prog-mode-hook #'my-prog-mode-line-numbers-hook)
 
-;; Suppress "Keep current list of tags tables also?"
-(setq tags-add-tables nil)
-;; Suppress "Tags file path/to/TAGS has changed, read new contents? (y or n)"
-(setq tags-revert-without-query t)
-
 (use-package editorconfig
   :config
   (setq editorconfig-trim-whitespaces-mode 'ws-butler-mode)
@@ -898,6 +893,222 @@ Guarded on `obsidian-mode' because minor mode hooks also run on exit."
     (setq claude-code-ide-terminal-backend 'eat)
     :config
     (claude-code-ide-emacs-tools-setup)))
+
+;;;; Programming (Tags):
+
+;; Projectile dropped its tags support in v3.4.0, so `my-regenerate-tags' below
+;; stands in for `projectile-regenerate-tags'.
+;;
+;; The file list comes from Projectile rather than letting Ctags walk the tree
+;; itself, so the table covers exactly the files Projectile indexes: .gitignore,
+;; .projectile and the globally ignored lists are all honored.
+
+;; Suppress "Keep current list of tags tables also?"
+(setq tags-add-tables nil)
+;; Suppress "Tags file path/to/TAGS has changed, read new contents? (y or n)"
+(setq tags-revert-without-query t)
+
+(defvar my-tags-file-name "TAGS"
+  "Name of the tags file, relative to the project root.
+\"TAGS\" is in `projectile-globally-ignored-files' by default, which is
+what keeps the generated file out of the project's own file list; change
+one and change the other.")
+
+(defun my-tags-visit-table ()
+  "Point tags commands at the current project's tags file, if it has one.
+Sets `tags-file-name' buffer-locally rather than globally, so that buffers
+from different projects can use different tables in one session.  With it
+set, \\[xref-find-definitions] resolves through the etags backend instead
+of prompting for a tags table."
+  (when-let* ((root (projectile-project-root))
+               (tags-file (expand-file-name my-tags-file-name root))
+               ((file-exists-p tags-file))
+               ((not (equal tags-file tags-file-name))))
+    ;; `visit-tags-table' rejects a file that is not a valid tags table, and a
+    ;; truncated or half-written TAGS should not stop the file from opening.
+    (with-demoted-errors "Error loading tags file: %S"
+      (visit-tags-table tags-file t))))
+
+(add-hook 'find-file-hook #'my-tags-visit-table)
+
+(defvar my-tags-program-options nil
+  "Extra arguments passed to Ctags by `my-regenerate-tags'.
+For example, (\"--kinds-C=+px\") to also tag prototypes and externs.")
+
+(defvar my-tags-program 'unset
+  "Ctags executable used by `my-regenerate-tags', or nil if there is none.
+The value `unset' means detection has not run yet; name an executable
+here from local-init.el to skip detection entirely.")
+
+(defun my-tags-ensure-program ()
+  "Return the Ctags executable to use, detecting it on the first call.
+Only Universal or Exuberant Ctags will do, and the program's name is not
+enough to establish that: BSD ctags, which is what /usr/bin/ctags is on
+macOS, understands neither `-e' nor `-L', while some distributions ship
+Universal Ctags as `etags' or `ctags-universal'.  Detection spawns a
+subprocess, so it is deferred to first use instead of run during startup."
+  (when (eq my-tags-program 'unset)
+    (setq my-tags-program
+      (seq-some
+        (lambda (name)
+          (when-let* ((exe (executable-find name)))
+            (with-temp-buffer
+              (ignore-errors (call-process exe nil t nil "--version"))
+              (goto-char (point-min))
+              (and (looking-at-p "\\(?:Universal\\|Exuberant\\) Ctags") exe))))
+        '("ctags" "ctags-universal" "universal-ctags" "etags"))))
+  my-tags-program)
+
+(defvar my-tags-process nil
+  "The tags generation process started by `my-regenerate-tags', if any.")
+
+(defun my-regenerate-tags ()
+  "Regenerate the tags file at the root of the current project.
+Indexes the files Projectile lists for the project, writes
+`my-tags-file-name' to the project root, and then points the project's
+buffers at the result so \\[xref-find-definitions] picks it up.
+
+Runs asynchronously, since Ctags over a large tree takes long enough that
+blocking Emacs for it would be unpleasant.  Ctags output goes to `*ctags*'."
+  (interactive)
+  (when (process-live-p my-tags-process)
+    (user-error "A tags file is already being regenerated"))
+  (let* ((program (or (my-tags-ensure-program)
+                    (user-error "No Universal or Exuberant Ctags in `exec-path'")))
+          (root (projectile-acquire-root))
+          (files (or (projectile-project-files root)
+                   (user-error "Projectile lists no files in %s" root)))
+          (tags-file (expand-file-name my-tags-file-name root))
+          (list-file (make-temp-file "my-tags-"))
+          ;; Ctags records file names as it is given them, so running it from
+          ;; the project root over the relative names Projectile returns yields
+          ;; a table of root-relative paths, which is how the etags reader
+          ;; expects to find them named relative to the TAGS file.
+          (default-directory root))
+    ;; The list reaches Ctags through a temp file rather than stdin because
+    ;; writing a long list into a pipe blocks Emacs whenever the pipe fills,
+    ;; which would undo the point of running the process asynchronously.
+    (with-temp-file list-file
+      (insert (mapconcat #'identity files "\n") "\n"))
+    (with-current-buffer (get-buffer-create "*ctags*")
+      (erase-buffer))
+    (setq my-tags-process
+      (make-process
+        :name "ctags"
+        :buffer "*ctags*"
+        :command (append (list program "-e" "-L" list-file "-f" tags-file)
+                   my-tags-program-options)
+        :connection-type 'pipe
+        :noquery t
+        :sentinel
+        (lambda (process _event)
+          (unless (process-live-p process)
+            (when (file-exists-p list-file)
+              (delete-file list-file))
+            (if (and (eq (process-status process) 'exit)
+                  (zerop (process-exit-status process)))
+              (progn
+                ;; Buffers that already point at this table need nothing:
+                ;; `tags-revert-without-query' rereads the changed file.
+                (dolist (buffer (projectile-project-buffers root))
+                  (with-current-buffer buffer
+                    (my-tags-visit-table)))
+                (message "Regenerated %s (%d files)" tags-file (length files)))
+              (message "Regenerating %s failed; see the *ctags* buffer"
+                tags-file))))))
+    (message "Regenerating %s (%d files)..." tags-file (length files))))
+
+(defvar my-tags-update-on-save-max-size (* 32 1024 1024)
+  "Largest tags file `my-tags-update-on-save-mode' will rewrite, in bytes.
+An update replaces one file's section, so Ctags only reparses that file,
+but the table is still written out whole: the cost of a save tracks the
+size of the table rather than the size of the edit.  Past this size the
+update is skipped and the table is left to `my-regenerate-tags' - a
+kernel tree's table runs into gigabytes, where rewriting it on every save
+would be painful.  nil means never skip.
+
+Safe as a directory-local variable, so a project that wants a different
+threshold can say so without touching the global value.")
+
+(put 'my-tags-update-on-save-max-size 'safe-local-variable
+  (lambda (value) (or (null value) (natnump value))))
+
+(defvar my-tags-size-warned nil
+  "Tags files already reported as too large to update on save.")
+
+(defun my-tags-update-file ()
+  "Refresh the saved buffer's entries in its project's tags file.
+Splices out the file's own section and has Ctags write a fresh one, so
+only the saved file is reparsed; see `my-tags-update-on-save-max-size'
+for the part of the cost that does not shrink with the edit.  Does
+nothing until the project has a tags file to update, which
+\\[my-regenerate-tags] creates."
+  (when-let* ((program (my-tags-ensure-program))
+               (file buffer-file-name)
+               (root (projectile-project-root))
+               ((file-in-directory-p file root))
+               (tags-file (expand-file-name my-tags-file-name root))
+               ;; Saving the table would otherwise re-enter this hook with the
+               ;; table itself as the file to index, and never stop.
+               ((not (equal file tags-file)))
+               ((file-exists-p tags-file)))
+    (if (and my-tags-update-on-save-max-size
+          (> (file-attribute-size (file-attributes tags-file))
+            my-tags-update-on-save-max-size))
+      (unless (member tags-file my-tags-size-warned)
+        (push tags-file my-tags-size-warned)
+        (message "%s is over %s; leaving it to %s"
+          tags-file
+          (file-size-human-readable my-tags-update-on-save-max-size 'iec)
+          (substitute-command-keys "\\[my-regenerate-tags]")))
+      (let ((relname (file-relative-name file root))
+             (default-directory root))
+        (with-current-buffer (or (get-file-buffer tags-file)
+                               (find-file-noselect tags-file))
+          (save-excursion
+            (let ((inhibit-read-only t))
+              ;; A section runs from its own "\f\n" header up to the next
+              ;; one, so dropping the stale section and letting Ctags append
+              ;; a fresh one at the end is a complete update.
+              (goto-char (point-min))
+              (when (search-forward (format "\f\n%s," relname) nil t)
+                (let ((start (match-beginning 0)))
+                  (search-forward "\f\n" nil 'move)
+                  (delete-region start (if (eobp) (point) (- (point) 2)))))
+              (goto-char (point-max))
+              ;; stderr is discarded rather than merged into the buffer: a
+              ;; Ctags warning landing in the table would corrupt it.
+              (apply #'call-process program nil '(t nil) nil
+                (append (list "-e" "-f" "-")
+                  my-tags-program-options
+                  (list relname)))))
+          (let ((save-silently t)
+                 (message-log-max nil))
+            (save-buffer 0)))
+        ;; Completion is the one consumer that reads the table as a whole, so
+        ;; it is also the one thing that cannot be updated in place.
+        (setq-default tags-completion-table nil)))))
+
+(define-minor-mode my-tags-update-on-save-mode
+  "Keep the current project's tags file current as its files are saved.
+
+Off by default, and deliberately so: even an incremental update rewrites
+the whole tags file, so the cost of a save follows the size of the table.
+In a tree large enough for that to hurt the update is skipped anyway -
+see `my-tags-update-on-save-max-size'.
+
+Projects without a tags file are untouched; create one with
+\\[my-regenerate-tags] first.  Toggle with \\[my-tags-update-on-save-mode]."
+  :global t
+  (if my-tags-update-on-save-mode
+    (add-hook 'after-save-hook #'my-tags-update-file)
+    (remove-hook 'after-save-hook #'my-tags-update-file)))
+
+(with-eval-after-load 'projectile
+  ;; `C-c p R' ran `projectile-regenerate-tags' before Projectile v3.4.0, but
+  ;; that key is now `projectile-replace-review'; `G' (generate) is unbound.
+  (define-key projectile-command-map (kbd "G") #'my-regenerate-tags)
+  (define-key projectile-command-map (kbd "U") #'my-tags-update-on-save-mode))
 
 ;;;; Common Lisp:
 
