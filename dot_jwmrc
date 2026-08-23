@@ -1,0 +1,272 @@
+<?xml version="1.0"?>
+<!--
+Configuration file for Joe's Window Manager
+https://joewing.net/projects/jwm/
+-->
+<JWM>
+
+  <!-- The root menu. -->
+  <RootMenu onroot="12">
+    <Program icon="utilities-terminal" label="Terminal">xterm</Program>
+    <Menu icon="folder" label="Applications">
+      <Program icon="calc" label="Calculator">xcalc</Program>
+      <Program icon="web-browser" label="Firefox">firefox</Program>
+      <Program icon="web-browser" label="Tor Browser">tor-browser</Program>
+      <Program icon="web-browser" label="Lynx">xterm -T Lynx -e lynx</Program>
+      <Program label="Emacs">emacs</Program>
+    </Menu>
+    <Menu icon="folder" label="Utilities">
+      <Program label="Htop">xterm -T Htop -e htop</Program>
+      <Program label="Display Configuration">arandr</Program>
+      <Program icon="font" label="Fonts">xfontsel</Program>
+      <Program icon="info" label="Window Properties">xprop | xmessage -file -</Program>
+      <Program icon="info" label="Window Information">xwininfo | xmessage -file -</Program>
+    </Menu>
+    <Separator/>
+    <Program icon="lock" label="Lock">xlock -mode blank</Program>
+    <Separator/>
+    <Restart label="Restart" icon="reload"/>
+    <Exit label="Exit" confirm="true" icon="exit"/>
+  </RootMenu>
+
+  <!-- Options for program groups. -->
+  <Group>
+    <!-- Ignore increment size hint for xterm since otherwise there will be gaps
+    around xterm windows which are maximized or tiled. -->
+    <Name>xterm</Name>
+    <Option>iignore</Option>
+  </Group>
+
+  <!-- Tray at the bottom. -->
+  <Tray x="0" y="-1" autohide="off" delay="1000">
+    <TrayButton label="JWM">root:1</TrayButton>
+    <Spacer width="2"/>
+    <TrayButton label="_">showdesktop</TrayButton>
+    <Spacer width="2"/>
+    <Pager labeled="true"/>
+    <TaskList maxwidth="256" labeled="true"/>
+    <Dock/>
+    <Clock format="%d %a %H:%M"/>
+  </Tray>
+
+  <!-- Visual Styles -->
+  <WindowStyle decorations="flat">
+    <Font>Sans-12:bold</Font>
+    <Width>4</Width>
+    <Corner>0</Corner>
+    <Foreground>#FFFFFF</Foreground>
+    <Background>#555555</Background>
+    <Opacity>0.5</Opacity>
+    <Active>
+      <Foreground>#FFFFFF</Foreground>
+      <Background>#0077CC</Background>
+      <Opacity>1.0</Opacity>
+    </Active>
+  </WindowStyle>
+  <TrayStyle decorations="flat">
+    <Font>Sans-12</Font>
+    <Background>#333333</Background>
+    <Foreground>#FFFFFF</Foreground>
+    <Opacity>0.75</Opacity>
+  </TrayStyle>
+  <TaskListStyle list="desktop" group="false">
+    <Font>Sans-12</Font>
+    <Active>
+      <Foreground>#FFFFFF</Foreground>
+      <Background>#555555</Background>
+    </Active>
+    <Foreground>#FFFFFF</Foreground>
+    <Background>#333333</Background>
+  </TaskListStyle>
+  <PagerStyle>
+    <Foreground>#555555</Foreground>
+    <Background>#333333</Background>
+    <Text>#FFFFFF</Text>
+    <Active>
+      <Foreground>#0077CC</Foreground>
+      <Background>#004488</Background>
+    </Active>
+  </PagerStyle>
+  <MenuStyle decorations="flat">
+    <Font>Sans-12</Font>
+    <Foreground>#FFFFFF</Foreground>
+    <Background>#333333</Background>
+    <Active>
+      <Foreground>#FFFFFF</Foreground>
+      <Background>#0077CC</Background>
+    </Active>
+    <Opacity>0.85</Opacity>
+  </MenuStyle>
+  <PopupStyle>
+    <Font>Sans-12</Font>
+    <Foreground>#000000</Foreground>
+    <Background>#999999</Background>
+  </PopupStyle>
+
+  <!-- Path where icons can be found.  IconPath can be listed multiple times to
+  allow searching for icons in multiple paths. -->
+  <!-- Commenting these out since none of them exist.
+  <IconPath>/usr/local/share/icons/Tango/scalable/actions</IconPath>
+  <IconPath>/usr/local/share/icons/Tango/scalable/apps</IconPath>
+  <IconPath>/usr/local/share/icons/Tango/scalable/places</IconPath>
+  <IconPath>/usr/local/share/icons/Tango/scalable/status</IconPath>
+  <IconPath>/usr/local/share/icons/Tango/scalable/mimetypes</IconPath>
+  <IconPath>/usr/local/share/jwm</IconPath>
+  -->
+
+  <!-- Virtual Desktops -->
+  <!-- Desktop tags can be contained within Desktops for desktop names. -->
+  <Desktops width="4" height="1">
+    <!-- Default background.  Note that a Background tag can be contained
+    within a Desktop tag to give a specific background for that desktop. -->
+    <Background type="solid">#111111</Background>
+  </Desktops>
+
+  <!-- Double click speed (in milliseconds) -->
+  <DoubleClickSpeed>400</DoubleClickSpeed>
+
+  <!-- Double click delta (in pixels) -->
+  <DoubleClickDelta>2</DoubleClickDelta>
+
+  <!-- The focus model (sloppy or click) -->
+  <FocusModel>sloppy</FocusModel>
+
+  <!-- The snap mode (none, screen, or border) -->
+  <SnapMode distance="10">border</SnapMode>
+
+  <!-- The move mode (outline or opaque) -->
+  <MoveMode>opaque</MoveMode>
+
+  <!-- The resize mode (outline or opaque) -->
+  <ResizeMode>opaque</ResizeMode>
+
+  <!-- ************ -->
+  <!-- Key Bindings -->
+  <!-- ************ -->
+
+  <!-- Menu navigation -->
+  <Key key="Up">up</Key>
+  <Key key="Down">down</Key>
+  <Key key="Right">right</Key>
+  <Key key="Left">left</Key>
+  <Key key="h">left</Key>
+  <Key key="j">down</Key>
+  <Key key="k">up</Key>
+  <Key key="l">right</Key>
+  <Key key="Return">select</Key>
+  <Key key="Escape">escape</Key>
+
+  <!-- JWM commands -->
+  <Key mask="4" key="slash">root:1</Key>
+  <Key mask="CA4" key="r">restart</Key>
+  <Key mask="CA4" key="q">exit</Key>
+
+  <!-- Screen locking -->
+  <Key mask="4A" key="q">exec:xlock -mode blank</Key>
+  <Key mask="CA" key="Delete">exec:xlock -mode blank</Key>
+
+  <!-- Open terminal -->
+  <Key mask="4" key="Return">exec:xterm</Key>
+
+  <!-- Application launcher -->
+  <Key mask="4" key="space">exec:dmenu_run</Key>
+  <Key mask="4" key="r">exec:rofi -show drun -modes 'drun,run' -show-icons</Key>
+
+  <!-- Window closing -->
+  <Key mask="4" key="q">close</Key>
+
+  <!-- Window cycling -->
+  <Key mask="4" key="Tab">nextstacked</Key>
+  <Key mask="A" key="Tab">nextstacked</Key>
+  <Key mask="4A" key="h">prev</Key>
+  <Key mask="4A" key="l">next</Key>
+  <Key mask="4A" key="Left">prev</Key>
+  <Key mask="4A" key="Right">next</Key>
+  <Key mask="4" key="Escape">exec:rofi -show window -modes 'window,drun' -show-icons</Key>
+  <!-- For my laptop with the broken Tab key... -->
+  <Key mask="4" key="grave">nextstacked</Key>
+  <Key mask="A" key="grave">nextstacked</Key>
+
+  <!-- Window size and position -->
+  <Key mask="4" key="f">fullscreen</Key>
+  <Key mask="4" key="m">maximize</Key>
+  <Key mask="4" key="n">minimize</Key>
+  <Key mask="4" key="v">maxv</Key>
+  <Key mask="4" key="b">maxh</Key>
+  <Key mask="4" key="h">maxleft</Key>
+  <Key mask="4" key="l">maxright</Key>
+  <Key mask="4" key="j">maxtop</Key>
+  <Key mask="4" key="k">maxbottom</Key>
+  <Key mask="4" key="Left">maxleft</Key>
+  <Key mask="4" key="Right">maxright</Key>
+  <Key mask="4" key="Up">maxtop</Key>
+  <Key mask="4" key="Down">maxbottom</Key>
+  <Key mask="4" key="w">window</Key>
+  <Key mask="4" key="s">move</Key>
+  <Key mask="4" key="z">resize</Key>
+  <Key mask="4" key="x">shade</Key>
+  <Key mask="4" key="c">restore</Key>
+
+  <!-- Switch between virtual desktops -->
+  <Key mask="4" key="comma">ldesktop</Key>
+  <Key mask="4" key="period">rdesktop</Key>
+  <Key mask="4" key="Page_Up">ldesktop</Key>
+  <Key mask="4" key="Page_Down">rdesktop</Key>
+  <Key mask="4" key="#">desktop#</Key>
+
+  <!-- Moving windows between virtual desktops -->
+  <Key mask="4A" key="comma">sendl</Key>
+  <Key mask="4A" key="period">sendr</Key>
+  <Key mask="4A" key="Page_Up">sendl</Key>
+  <Key mask="4A" key="Page_Down">sendr</Key>
+
+  <!--
+  Simulate volume, microphone, and backlight keys.  F[1-6] were deliberately
+  chosen to correspond with the function keys on ThinkPad keyboards.
+
+  vol/mic/bl are shell scripts that abstract the underlying commands, which
+  differ by system.  See <https://github.com/ixtenu/script> for those scripts.
+  -->
+  <Key mask="4" key="F1">exec:vol mute</Key>
+  <Key mask="4" key="F2">exec:vol down</Key>
+  <Key mask="4" key="F3">exec:vol up</Key>
+  <Key mask="4" key="F4">exec:mic toggle</Key>
+  <Key mask="4" key="F5">exec:bl dec</Key>
+  <Key mask="4" key="F6">exec:bl inc</Key>
+
+  <!-- ************** -->
+  <!-- Mouse Bindings -->
+  <!-- ************** -->
+
+  <Mouse context="root" button="4">ldesktop</Mouse>
+  <Mouse context="root" button="5">rdesktop</Mouse>
+
+  <Mouse context="title" button="1">move</Mouse>
+  <Mouse context="title" button="2">move</Mouse>
+  <Mouse context="title" button="3">window</Mouse>
+  <Mouse context="title" button="4">shade</Mouse>
+  <Mouse context="title" button="5">shade</Mouse>
+
+  <Mouse context="icon" button="1">window</Mouse>
+  <Mouse context="icon" button="2">move</Mouse>
+  <Mouse context="icon" button="3">window</Mouse>
+  <Mouse context="icon" button="4">shade</Mouse>
+  <Mouse context="icon" button="5">shade</Mouse>
+
+  <Mouse context="border" button="1">resize</Mouse>
+  <Mouse context="border" button="2">move</Mouse>
+  <Mouse context="border" button="3">window</Mouse>
+
+  <Mouse context="close" button="-1">close</Mouse>
+  <Mouse context="close" button="2">move</Mouse>
+  <Mouse context="close" button="-3">close</Mouse>
+
+  <Mouse context="maximize" button="-1">maximize</Mouse>
+  <Mouse context="maximize" button="-2">maxv</Mouse>
+  <Mouse context="maximize" button="-3">maxh</Mouse>
+
+  <Mouse context="minimize" button="-1">minimize</Mouse>
+  <Mouse context="minimize" button="2">move</Mouse>
+  <Mouse context="minimize" button="-3">shade</Mouse>
+
+</JWM>

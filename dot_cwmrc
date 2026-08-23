@@ -1,0 +1,201 @@
+# White-on-black menus.
+color menubg black
+color menufg white
+color font white
+
+# Automatically add new windows to the current group
+sticky yes
+
+# Snap windows to edges at 15 pixels distance
+snapdist 15
+
+# Move/resize faster (default is 1)
+moveamount 20
+
+# Menu commands
+command emacs emacs
+command firefox firefox
+command xterm xterm
+command xcalc xcalc
+
+# Default locker is xlock with no options.  By default, xlock picks a random
+# screen saver; many of these are ugly or distracting.  Use "blank" so that the
+# lock screen is a blank black screen.
+command lock "xlock -mode blank"
+
+#
+# Key Bindings
+#
+# The default cwm key bindings occasionally conflict with some applications:
+# e.g., C-slash is undo in Emacs.  These custom key bindings mostly use the
+# Mod4 (aka super or Windows) key, which is otherwise unused and thus avoids
+# such conflicts.
+#
+
+# Remove all default key bindings
+unbind-key all
+
+# cwm built-in commands.
+bind-key CM4-r restart # default: CMS-r
+bind-key CM4-q quit # default: CMS-q
+
+# Screen locking.
+bind-key C4-q lock
+# Additionally, restore the default Ctrl-Alt-Del binding.  This is unlikely to
+# conflict with any application.
+bind-key CM-Delete lock
+
+# Open terminal.
+bind-key 4-Return terminal # default: CM-Return
+
+# Menu operations.
+bind-key 4-slash menu-window # default: M-slash
+bind-key 4-question menu-exec # default: M-question
+bind-key 4-period menu-ssh # default: M-period
+
+# Application launching and window switching via rofi.
+# Functionally redundant with menu-{window,exec,ssh}, but rofi looks nicer.
+bind-key 4-Escape "rofi -show window -modes 'window,drun' -show-icons"
+bind-key 4-r "rofi -show drun -modes 'drun,run' -show-icons"
+bind-key 4-s "rofi -show ssh -modes ssh"
+
+# Open arbitrary program by name.
+bind-key 4-space dmenu_run
+
+# Window closing and visibility.
+bind-key 4-q window-close # default: CM-x
+bind-key 4-Down window-lower # default: M-Down
+bind-key 4-Up window-raise # default: M-Up
+
+# Window cycling.
+bind-key 4-Tab window-cycle
+bind-key S4-Tab window-rcycle
+# Additionally, restore the default Alt-tab bindings for window cycling.  These
+# are used by most window managers and by MS-Windows; so using them is muscle
+# memory and they rarely conflict with application key bindings.
+bind-key M-Tab window-cycle
+bind-key MS-Tab window-rcycle
+# Cycle between windows for the current application.
+#bind-key 4-grave window-cycle-inclass
+#bind-key S4-grave window-rcycle-inclass
+bind-key M-grave window-cycle-inclass
+bind-key MS-grave window-cycle-inclass
+
+# Window maximization.
+bind-key 4-f window-fullscreen # default: CM-f
+bind-key 4-m window-maximize # default: CM-m
+bind-key 4-equal window-vmaximize # default: CM-equal
+bind-key S4-equal window-hmaximize # default: CMS-equal
+
+# Window tiling.  No default bindings.
+bind-key 4-b window-htile
+bind-key 4-v window-vtile
+
+# Window movement.  Defaults to M-[hjkl] and MS-[hjkl].
+bind-key 4-h window-move-left
+bind-key 4-j window-move-down
+bind-key 4-k window-move-up
+bind-key 4-l window-move-right
+bind-key S4-h window-move-left-big
+bind-key S4-j window-move-down-big
+bind-key S4-k window-move-up-big
+bind-key S4-l window-move-right-big
+
+# Window resizing.  Defaults to CM-[hjkl] and CMS-[hjkl].
+bind-key C4-h window-resize-left
+bind-key C4-j window-resize-down
+bind-key C4-k window-resize-up
+bind-key C4-l window-resize-right
+bind-key CS4-h window-resize-left-big
+bind-key CS4-j window-resize-down-big
+bind-key CS4-k window-resize-up-big
+bind-key CS4-l window-resize-right-big
+
+# Window snap to edge.  No default bindings.
+bind-key M4-h window-snap-left
+bind-key M4-j window-snap-down
+bind-key M4-k window-snap-up
+bind-key M4-l window-snap-right
+
+# Emulate workspaces with groups.  Super-n to switch workspaces, Shift-Super-n
+# to assign a window to a workspace.  No default bindings.
+bind-key 4-1 group-only-1
+bind-key 4-2 group-only-2
+bind-key 4-3 group-only-3
+bind-key 4-4 group-only-4
+bind-key 4-5 group-only-5
+bind-key 4-6 group-only-6
+bind-key 4-7 group-only-7
+bind-key 4-8 group-only-8
+bind-key 4-9 group-only-9
+bind-key S4-1 window-movetogroup-1
+bind-key S4-2 window-movetogroup-2
+bind-key S4-3 window-movetogroup-3
+bind-key S4-4 window-movetogroup-4
+bind-key S4-5 window-movetogroup-5
+bind-key S4-6 window-movetogroup-6
+bind-key S4-7 window-movetogroup-7
+bind-key S4-8 window-movetogroup-8
+bind-key S4-9 window-movetogroup-9
+# Cycle groups.
+bind-key 4-Right group-cycle # default: M-Right
+bind-key 4-Left group-rcycle # default: M-Left
+# Toggle group membership of window.
+bind-key 4-0 window-group # default: CM-g
+# Show window in all groups (while preserving its group).
+bind-key S4-0 window-stick # default: CM-s
+
+# Simulate volume, microphone, and backlight keys.  F[1-6] were deliberately
+# chosen to correspond with the function keys on ThinkPad keyboards.
+#
+# vol/mic/bl are shell scripts that abstract the underlying commands, which
+# differ by system.  See <https://github.com/ixtenu/script> for those scripts.
+bind-key 4-F1 vol mute
+bind-key 4-F2 vol down
+bind-key 4-F3 vol up
+bind-key 4-F4 mic toggle
+bind-key 4-F5 bl dec
+bind-key 4-F6 bl inc
+
+# Default bindings which are unbound
+#bind-key C-slash menu-cmd
+#bind-key CM-w menu-exec-wm
+#bind-key M-Return window-hide
+#bind-key CMS-f window-freeze
+#bind-key CM-0 group-toggle-0
+#bind-key CM-1 group-toggle-1
+#bind-key CM-2 group-toggle-2
+#bind-key CM-3 group-toggle-3
+#bind-key CM-4 group-toggle-4
+#bind-key CM-5 group-toggle-5
+#bind-key CM-6 group-toggle-6
+#bind-key CM-7 group-toggle-7
+#bind-key CM-8 group-toggle-8
+#bind-key CM-9 group-toggle-9
+#bind-key CM-a group-toggle-all
+
+#
+# Mouse Bindings
+#
+
+# Remove some of the default mouse bindings.
+unbind-mouse M-1
+unbind-mouse M-2
+unbind-mouse M-3
+unbind-mouse CM-1
+unbind-mouse CMS-3
+
+# Moving and resizing windows.
+bind-mouse 4-1 window-move # default: M-1
+bind-mouse 4-3 window-resize # default: M-2
+
+# Closing a window.
+bind-mouse 4-2 window-close
+
+# Raising and lowering a window.
+bind-mouse S4-1 window-raise
+bind-mouse S4-3 window-lower
+
+# Default bindings which are unbound
+#bind-mouse CM-1 window-group
+#bind-mouse CMS-3 window-hide
