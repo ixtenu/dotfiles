@@ -66,6 +66,7 @@ bind-key 4-space dmenu_run
 bind-key 4-q window-close # default: CM-x
 bind-key 4-Down window-lower # default: M-Down
 bind-key 4-Up window-raise # default: M-Up
+bind-key 4-n window-hide
 
 # Window cycling.
 bind-key 4-Tab window-cycle
