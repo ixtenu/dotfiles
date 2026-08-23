@@ -1,0 +1,224 @@
+#!/usr/bin/env sh
+# Command-line volume control abstraction.  Supported backends:
+# - pamixer (PulseAudio)
+# - amixer (PulseAudio; untested)
+# - sndioctl (OpenBSD)
+# - mixer (FreeBSD; untested)
+set -eu
+
+default_inc=5
+
+usage() {
+  echo "usage: $0 get|up|down|set|mute [value]" 1>&$1
+  echo "Manipulate system volume." 1>&$1
+  echo "For get, value must be omitted." 1>&$1
+  echo "For up/down/set, value is a percentage (0-100)." 1>&$1
+  echo "For up/down, value defaults to $default_inc; for set, value defaults to 100." 1>&$1
+  echo "For mute, value is a boolean; if omitted, mute is toggled." 1>&$1
+  exit $(($1 - 1))
+}
+
+is_percent() {
+  [ "$(echo "$1" | sed 's/[0-9]*//')" = "" ] && [ $1 -ge 0 ] && [ $1 -le 100 ]
+}
+
+percent_to_frac() {
+  echo "scale=2; $1 / 100" | bc
+}
+
+is_true() {
+  v="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$v" in
+  "on"|"true"|"t"|"y"|"yes"|"1") return 0;;
+  *) return 1;;
+  esac
+}
+
+is_false() {
+  v="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$v" in
+  "off"|"false"|"f"|"n"|"no"|"0"|"nil") return 0;;
+  *) return 1;;
+  esac
+}
+
+is_bool() {
+  is_true $1 || is_false $1
+}
+
+is_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+volume_get() {
+  if [ $# -ne 0 ]; then
+    echo "$0: unexpected value"
+    exit 1
+  fi
+  if is_cmd pamixer; then
+    pamixer --get-volume-human
+  elif is_cmd amixer; then
+    amixer get Master
+  elif is_cmd sndioctl; then
+    sndioctl output.level
+  elif is_cmd mixer; then
+    mixer vol.volume
+  else
+    echo "$0: don't know how to get volume on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_up() {
+  if [ $# -eq 0 ]; then
+    v=$default_inc
+  elif ! is_percent "$1"; then
+    echo "$0: \"$1\" is not a percentage (0-100)" 1>&2
+    exit 1
+  else
+    v="$1"
+  fi
+  if is_cmd pamixer; then
+    pamixer -i $v
+  elif is_cmd amixer; then
+    amixer -q set Master ${v}%+ unmute
+  elif is_cmd sndioctl; then
+    sndioctl output.level=+$(percent_to_frac $v) >/dev/null
+  elif is_cmd mixer; then
+    mixer vol.volume=+${v}%
+  else
+    echo "$0: don't know how to raise volume on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_down() {
+  if [ $# -eq 0 ]; then
+    v=$default_inc
+  elif ! is_percent "$1"; then
+    echo "$0: \"$1\" is not a percentage (0-100)" 1>&2
+    exit 1
+  else
+    v="$1"
+  fi
+  if is_cmd pamixer; then
+    pamixer -d $v
+  elif is_cmd amixer; then
+    amixer -q set Master ${v}%- unmute
+  elif is_cmd sndioctl; then
+    sndioctl output.level=-$(percent_to_frac $v) >/dev/null
+  elif is_cmd mixer; then
+    mixer vol.volume=-${v}%
+  else
+    echo "$0: don't know how to lower volume on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_set() {
+  if [ $# -eq 0 ]; then
+    v=100
+  elif ! is_percent "$1"; then
+    echo "$0: \"$1\" is not a percentage (0-100)" 1>&2
+    exit 1
+  else
+    v="$1"
+  fi
+  if is_cmd pamixer; then
+    pamixer --set-volume $v
+  elif is_cmd amixer; then
+    amixer -q set Master ${v}% unmute
+  elif is_cmd sndioctl; then
+    sndioctl output.level=$(percent_to_frac $v) >/dev/null
+  elif is_cmd mixer; then
+    mixer vol.volume=${v}%
+  else
+    echo "$0: don't know how to set volume on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_mute_on() {
+  if is_cmd pamixer; then
+    pamixer -m
+  elif is_cmd amixer; then
+    amixer -q set Master mute
+  elif is_cmd sndioctl; then
+    sndioctl output.mute=1 >/dev/null
+  elif is_cmd mixer; then
+    mixer vol.mute=1
+  else
+    echo "$0: don't know how to mute on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_mute_off() {
+  if is_cmd pamixer; then
+    pamixer -u
+  elif is_cmd amixer; then
+    amixer -q set Master unmute
+  elif is_cmd sndioctl; then
+    sndioctl output.mute=0 >/dev/null
+  elif is_cmd mixer; then
+    mixer vol.mute=0
+  else
+    echo "$0: don't know how to unmute on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_mute_toggle() {
+  if is_cmd pamixer; then
+    pamixer -t
+  elif is_cmd amixer; then
+    amixer -q set Master toggle
+  elif is_cmd sndioctl; then
+    sndioctl output.mute=! >/dev/null
+  elif is_cmd mixer; then
+    mixer vol.mute=^
+  else
+    echo "$0: don't know how to toggle mute on this system" 1>&2
+    exit 1
+  fi
+}
+
+volume_mute() {
+  if [ $# -eq 0 ]; then
+    v='toggle'
+  elif is_true "$1"; then
+    v='on'
+  elif is_false "$1"; then
+    v='off'
+  else
+    echo "$0: mute value \"$v\" unrecognized" 1>&2
+    exit 1
+  fi
+  case "$v" in
+  "on") volume_mute_on;;
+  "off") volume_mute_off;;
+  "toggle") volume_mute_toggle;;
+  esac
+}
+
+[ $# -lt 1 ] && usage 2
+action="$1"
+shift
+
+if [ $# -ge 1 ]; then
+  value="$1"
+  shift
+else
+  value=
+fi
+
+[ $# -ne 0 ] && usage 2
+
+case "$action" in
+"get") volume_get $value;;
+"up") volume_up $value;;
+"down") volume_down $value;;
+"set") volume_set $value;;
+"mute") volume_mute $value;;
+*) usage 2;;
+esac

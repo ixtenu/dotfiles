@@ -1,0 +1,126 @@
+#!/usr/bin/env sh
+# Backlight control abstraction.  Supported backends:
+# - light
+# - brightnessctl
+# - xbacklight
+set -eu
+
+default_inc=10
+
+usage() {
+  echo "usage: $0 get|inc|dec|set [value]" 1>&$1
+  echo "Manipulate the backlight brightness." 1>&$1
+  echo "For get, value must be omitted." 1>&$1
+  echo "For inc/dec/set, value is a percentage (0-100)." 1>&$1
+  echo "For inc/dec, value defaults to $default_inc; for set, value defaults to 100." 1>&$1
+  exit $(($1 - 1))
+}
+
+is_percent() {
+  [ "$(echo "$1" | sed 's/[0-9]*//')" = "" ] && [ $1 -ge 0 ] && [ $1 -le 100 ]
+}
+
+is_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+bl_get() {
+  if [ $# -ne 0 ]; then
+    echo "$0: unexpected value"
+    exit 1
+  fi
+  if is_cmd light; then
+    light
+  elif is_cmd brightnessctl; then
+    brightnessctl
+  elif is_cmd xbacklight; then
+    xbacklight
+  else
+    echo "$0: don't know how to get backlight on this system" 1>&2
+    exit 1
+  fi
+}
+
+bl_inc() {
+  if [ $# -eq 0 ]; then
+    v=$default_inc
+  elif ! is_percent "$1"; then
+    echo "$0: \"$1\" is not a percentage (0-100)" 1>&2
+    exit 1
+  else
+    v="$1"
+  fi
+  if is_cmd light; then
+    light -A $v
+  elif is_cmd brightnessctl; then
+    brightnessctl set ${v}%+
+  elif is_cmd xbacklight; then
+    xbacklight -inc $v
+  else
+    echo "$0: don't know how to increase backlight on this system" 1>&2
+    exit 1
+  fi
+}
+
+bl_dec() {
+  if [ $# -eq 0 ]; then
+    v=$default_inc
+  elif ! is_percent "$1"; then
+    echo "$0: \"$1\" is not a percentage (0-100)" 1>&2
+    exit 1
+  else
+    v="$1"
+  fi
+  if is_cmd light; then
+    light -U $v
+  elif is_cmd brightnessctl; then
+    brightnessctl set ${v}%-
+  elif is_cmd xbacklight; then
+    xbacklight -dec $v
+  else
+    echo "$0: don't know how to decrease backlight on this system" 1>&2
+    exit 1
+  fi
+}
+
+bl_set() {
+  if [ $# -eq 0 ]; then
+    v=100
+  elif ! is_percent "$1"; then
+    echo "$0: \"$1\" is not a percentage (0-100)" 1>&2
+    exit 1
+  else
+    v="$1"
+  fi
+  if is_cmd light; then
+    light -S $v
+  elif is_cmd brightnessctl; then
+    brightnessctl set ${v}%
+  elif is_cmd xbacklight; then
+    xbacklight -set $v
+  else
+    echo "$0: don't know how to set backlight on this system" 1>&2
+    exit 1
+  fi
+}
+
+[ $# -lt 1 ] && usage 2
+action="$1"
+shift
+
+if [ $# -ge 1 ]; then
+  value="$1"
+  shift
+else
+  value=
+fi
+
+[ $# -ne 0 ] && usage 2
+
+case "$action" in
+"get") bl_get $value;;
+"inc") bl_inc $value;;
+"dec") bl_dec $value;;
+"set") bl_set $value;;
+*) usage 2;;
+esac
