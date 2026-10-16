@@ -1,9 +1,17 @@
 #!/usr/bin/env sh
 # nix-shell(1) wrapper which starts zsh(1).
+#
+# Some shell.nix files have a shellHook that execs into a sandbox (such as a
+# buildFHSEnv), so the --command below never runs.  nix-shell resets $SHELL to
+# its own bash, so such a shell.nix should start ${NIX_INTERACTIVE_SHELL:-bash}
+# in the sandbox instead.
 
 if ! command -v nix-shell >/dev/null 2>&1; then
   echo "$(basename $0): no nix-shell in PATH" 1>&2
   exit 1
 fi
 
-exec nix-shell --run zsh "$@"
+# --command rather than --run: this is an interactive session, and shellHooks
+# test $PS1 to tell.
+export NIX_INTERACTIVE_SHELL=zsh
+exec nix-shell --command 'exec zsh' "$@"
