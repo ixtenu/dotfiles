@@ -305,6 +305,13 @@ exists and is not already present."
 (global-set-key (kbd "C-c <up>") 'windmove-up)
 (global-set-key (kbd "C-c <down>") 'windmove-down)
 
+;; Scroll the view by a single line without moving point (unless point would
+;; go offscreen).  Mode keymaps take precedence.
+(global-set-key (kbd "M-n") #'scroll-up-line)
+(global-set-key (kbd "M-<down>") #'scroll-up-line)
+(global-set-key (kbd "M-p") #'scroll-down-line)
+(global-set-key (kbd "M-<up>") #'scroll-down-line)
+
 ;; Jump to things
 (use-package avy
   :bind (("C-:"   . avy-goto-char)
